@@ -93,8 +93,9 @@ class ElasticSearch(object):
             
 
 class ElasticQuery(dict):
-    def query(self):
-        return dict(self)
+    '''
+    Wrapper for ElasticSearch queries.
+    '''
     
     def term(self,**kwargs):
         '''
@@ -343,8 +344,9 @@ class ElasticQuery(dict):
 
 
 class ElasticFilter(dict):
-    def query(self):
-        return self
+    '''
+    Wrapper for ElasticSearch filters
+    '''
 
     def and_filter(self, query=None):
         '''
