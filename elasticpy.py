@@ -106,6 +106,7 @@ class ElasticQuery(dict):
         else:
             self['term'] = dict(**kwargs)
 
+        return self
     def text(self, field, query, operator):
         '''
         ElasticQuery.text(field,query,[operator=('and'|'or')])
@@ -129,6 +130,7 @@ class ElasticQuery(dict):
         self['text'] = {field : query}
         if operator and (operator=='and' or operator=='or'): self['text']['operator'] = operator
 
+        return self
     def bool(self,must=None, should=None, must_not=None,minimum_number_should_match=-1, boost=-1):
         '''
         ElasticQuery.bool([must=ElasticQuery, should=ElasticQuery, must_not=ElasticQuery, minimum_number_should_match=-1, boost=-1]) 
@@ -161,6 +163,7 @@ class ElasticQuery(dict):
         if boost > 0:
             self['bool']['boost'] = boost
     
+        return self
     def ids(self, values=None, itype=''):
         '''
         ElasticQuery.ids(values=["1","4",..."n"], itype='my_type')
@@ -183,6 +186,7 @@ class ElasticQuery(dict):
         if itype:
             self['ids']['type'] = itype
 
+        return self
     def filter(self, **kwargs):
         '''
         and - A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html)
@@ -229,6 +233,7 @@ class ElasticQuery(dict):
             self['filter'][key] = val
 
 
+        return self
     def filtered(self, query, qfilter):
         '''
         ElasticQuery.filtered(query, qfilter)
@@ -243,14 +248,14 @@ class ElasticFilter(dict):
     def query(self):
         return self
 
-    def and(self, query=None):
+    def and_filter(self, query=None):
         '''
         and - A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html)
         '''
         if query:
             self['and'] = query
-
-    def bool(self,**kwargs):
+        return self
+    def bool_filter(self,**kwargs):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/bool-filter.html
         A filter that matches documents matching boolean combinations of other queries. Similar in concept to Boolean query, except that the clauses are other filters. Can be placed within queries that accept a filter.
@@ -262,6 +267,7 @@ class ElasticFilter(dict):
             if key in keywords:
                 self['bool'][key] = val
 
+        return self
     def exists(self, field=''):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/exists-filter.html
@@ -273,6 +279,7 @@ class ElasticFilter(dict):
         if field:
             self['field'] = field
 
+        return self
     def ids(self, values=[], itype=''):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/ids-filter.html
@@ -284,6 +291,7 @@ Filters documents that only have the provided ids. Note, this filter does not re
         if itype:
             self['ids']['itype'] = itype
     
+        return self
     def limit(self, value=0):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/limit-filter.html
@@ -292,6 +300,7 @@ Filters documents that only have the provided ids. Note, this filter does not re
         if value>0:
             self['limit'] = value
 
+        return self
     def type(self,value=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/type-filter.html
@@ -301,4 +310,52 @@ Filters documents matching the provided document / mapping type. Note, this filt
         if value: self['type'] = dict(value=value)
 
     
+        return self
+    def geo_bounding_box(self, field, top_left, bottom_right):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/geo-bounding-box-filter.html
+
+        > bounds = ElasticFilter().geo_bounding_box('pin.location', [40.73, -74.1], [40.717, -73.99])
+        > bounds = ElasticFilter().geo_bounding_box('pin.location', dict(lat=40.73, lon=-74.1), dict(lat=40.717, lon=-73.99))
+        > bounds = ElasticFilter().geo_bounding_box('pin.location', "40.73, -74.1", "40.717, -73.99")
+        And geohash
+        > bounds = ElasticFilter().geo_bounding_box('pin.location', "drm3btev3e86", "drm3btev3e86")
+
+        '''
+        if not field and top_left and bottom_right: return
+        self['geo_bounding_box'] = {field: {'top_left' : top_left, 'bottom_right' : bottom_right }}
+
+        return self
+    def geo_distance(self, field, center, distance, distance_type='arc'):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/geo-distance-filter.html
+        Filters documents that include only hits that exists within a specific distance from a geo point.
+        field - Field name
+        center - Center point (Geo point)
+        distance - String for the distance
+        distance_type - (arc | plane) How to compute the distance. Can either be arc (better precision) or plane (faster). Defaults to arc
+        > bounds = ElasticFilter().geo_distance('pin.location', [40.73, -74.1], '300km')
+        '''
+
+        if not (field and center and distance): return
+
+        self['geo_distance'] = dict(distance=distance, distance_type=distance_type)
+        self['geo_distance'][field] = center
+
+        return self
+
+    def geo_distance_range(self, field, center, from_distance, to_distance, distance_type='arc'):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/geo-distance-range-filter.html
+        Filters documents that exists within a range from a specific point
+
+
+        '''
+
+        if not (field and center and from_distance and to_distance): return
+        self['geo_distance_range'] = dict(to=to_distance, distance_type=distance_type)
+        self['geo_distance_range']['from'] = from_distance
+        self['geo_distance_range'][field] = center
+        return self
+
 
