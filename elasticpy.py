@@ -28,7 +28,7 @@ class ElasticSearch(object):
         '''
         ElasticSearch.search_simple(index,itype,key,search_term)
         Usage: 
-        > es = elasticpy.ElasticSearch()
+        > es = ElasticSearch()
         > es.search_simple('twitter','users','name','kim')
         '''
         headers = {
@@ -122,9 +122,8 @@ class ElasticQuery(dict):
         operator - 'and'|'or'
 
         A family of text queries that accept text, analyzes it, and constructs a query out of it.
-        > eq = elasticpy.ElasticQuery()
-        > eq.text('message', 'this is a test')
-        > eq.query
+        > eq = ElasticQuery().text('message','this is a test')
+        > eq
           {
             'text' : {
               'message' : 'this is a test'
@@ -174,9 +173,8 @@ class ElasticQuery(dict):
         ElasticQuery.ids(values=["1","4",..."n"], itype='my_type')
         http://www.elasticsearch.org/guide/reference/query-dsl/ids-query.html
         Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
-        > query = elasticpy.ElasticQuery()
-        > query.ids(['1','2'], type='tweets')
-        > query.query()
+        > query = ElasticQuery().ids(['1','2'],type='tweets')
+        > query
           {
             'ids' : {
               'type' : 'tweets',
@@ -283,7 +281,7 @@ class ElasticQuery(dict):
             boost=1.0,
             analyze_wildcard=None,
             auto_generate_phase_queries=False,
-            minimum_should_match=None)
+            minimum_should_match=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/query-string-query.html
         A query that uses a query parser in order to parse its content.
@@ -317,7 +315,7 @@ class ElasticQuery(dict):
             to_value, 
             include_lower=True,
             include_upper=True,
-            boost=1.0)
+            boost=1.0):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/range-query.html
         Matches documents with fields that have terms within a certain range. The type of the Lucene query depends on the field type, for string fields, the TermRangeQuery, while for number/date fields, the query is a NumericRangeQuery. The following example returns all documents where age is between 10 and 20:
