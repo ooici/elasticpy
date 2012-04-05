@@ -115,12 +115,7 @@ class ElasticQuery(dict):
         return self
     def text(self, field, query, operator):
         '''
-        ElasticQuery.text(field,query,[operator=('and'|'or')])
         http://www.elasticsearch.org/guide/reference/query-dsl/text-query.html
-
-        field - Field name
-        query - The search query
-        operator - 'and'|'or'
 
         A family of text queries that accept text, analyzes it, and constructs a query out of it.
         > eq = ElasticQuery().text('message','this is a test')
@@ -138,7 +133,6 @@ class ElasticQuery(dict):
         return self
     def bool(self,must=None, should=None, must_not=None,minimum_number_should_match=-1, boost=-1):
         '''
-        ElasticQuery.bool([must=ElasticQuery, should=ElasticQuery, must_not=ElasticQuery, minimum_number_should_match=-1, boost=-1]) 
         http://www.elasticsearch.org/guide/reference/query-dsl/bool-query.html
         A query that matches documents matching boolean combinations of other queris. The bool query maps to Lucene BooleanQuery. It is built using one of more boolean clauses, each clause with a typed occurrenc. The occurrence types are:
         'must' - The clause(query) must appear in matching documents.
@@ -171,7 +165,6 @@ class ElasticQuery(dict):
         return self
     def ids(self, values=None, itype=''):
         '''
-        ElasticQuery.ids(values=["1","4",..."n"], itype='my_type')
         http://www.elasticsearch.org/guide/reference/query-dsl/ids-query.html
         Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
         > query = ElasticQuery().ids(['1','2'],type='tweets')
@@ -228,8 +221,7 @@ class ElasticQuery(dict):
     def mlt(self, like_text, fields='_all',percent_terms_to_match=0.3, min_term_freq=2, max_query_terms=25, stop_words=[], min_doc_freq=5, max_doc_freq=0, min_word_len=0, max_word_len=0, boost_terms=1, boost=1, analyzer=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/mlt-query.html
-        More like this query find documents that are “like” provided text by running it against one or more fields.
-
+        More like this query find documents that are "like" provided text by running it against one or more fields.
         > query = ElasticQuery().mlt('text like this one', fields=['post.content'])
         '''
 
@@ -350,7 +342,8 @@ class ElasticFilter(dict):
 
     def and_filter(self, query=None):
         '''
-        and - A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html)
+        http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html
+        A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. 
         '''
         if query:
             self['and'] = query
