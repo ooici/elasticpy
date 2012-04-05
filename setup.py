@@ -9,5 +9,7 @@ setup(
     author='Luke Campbell',
     author_email='luke.s.campbell@gmail.com',
     url='http://lukecampbell.github.com',
-    packages=['elasticpy'],
+    license='Apache 2.0',
+    py_modules=['elasticpy'],
+    data_files = [('.', ['ChangeLog', 'LICENSE', 'README'])]
 )
