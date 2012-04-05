@@ -183,4 +183,122 @@ class ElasticQuery(dict):
         if itype:
             self['ids']['type'] = itype
 
+    def filter(self, **kwargs):
+        '''
+        and - A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html)
+        bool - A filter that matches documents matching boolean combinations of other queries. Similar in concept to Boolean query, except that the clauses are other filters. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/bool-filter.html)
+        exists - Filters documents where a specific field has a value in them. (http://www.elasticsearch.org/guide/reference/query-dsl/exists-filter.html)
+        ids - Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field. (http://www.elasticsearch.org/guide/reference/query-dsl/ids-filter.html)
+        limit - A limit filter limits the number of documents (per shard) to execute on. (http://www.elasticsearch.org/guide/reference/query-dsl/limit-filter.html)
+        type - Filters documents matching the provided document / mapping type. Note, this filter can work even when the _type field is not indexed (using the _uid field). (http://www.elasticsearch.org/guide/reference/query-dsl/type-filter.html)
+        geo_bbox - A filter allowing to filter hits based on a point location using a bounding box. Assuming the following indexed document: (http://www.elasticsearch.org/guide/reference/query-dsl/geo-bounding-box-filter.html)
+        Example:
+        > 
+
+
+        '''
+        filters = [
+            'and',
+            'bool',
+            'exists',
+            'ids',
+            'limit',
+            'type',
+            'geo_bbox',
+            'geo_distance',
+            'geo_distance_range',
+            'geo_polygon',
+            'has_child',
+            'match_all',
+            'missing',
+            'not',
+            'numeric_range',
+            'or',
+            'prefix',
+            'query',
+            'range',
+            'script',
+            'term',
+            'terms',
+            'nested'
+        ]
+        if not 'filter' in self:
+            self['filter'] = dict()
+        for key,val in kwarg.iteritems():
+            if key not in filters: continue
+            self['filter'][key] = val
+
+
+    def filtered(self, query, qfilter):
+        '''
+        ElasticQuery.filtered(query, qfilter)
+        http://www.elasticsearch.org/guide/reference/query-dsl/filtered-query.html 
+        A query that applies a filter to the results of another query. This query maps to Lucene FilteredQuery.
+        > 
+        '''
+        pass
+
+
+class ElasticFilter(dict):
+    def query(self):
+        return self
+
+    def and(self, query=None):
+        '''
+        and - A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter. (http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html)
+        '''
+        if query:
+            self['and'] = query
+
+    def bool(self,**kwargs):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/bool-filter.html
+        A filter that matches documents matching boolean combinations of other queries. Similar in concept to Boolean query, except that the clauses are other filters. Can be placed within queries that accept a filter.
+        '''
+
+        self['bool'] = dict()
+        keywords= ['must', 'must_not', 'should']
+        for key,val in kwargs.iteritems():
+            if key in keywords:
+                self['bool'][key] = val
+
+    def exists(self, field=''):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/exists-filter.html
+        Filters documents where a specific field has a value in them.
+        > filter = elasticpy.ElasticFilter().exists(field='user')
+        > filter.query()
+          {'exists' : {'field' : 'user' } }
+        '''
+        if field:
+            self['field'] = field
+
+    def ids(self, values=[], itype=''):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/ids-filter.html
+Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
+
+        '''
+        if not values: return
+        self['ids'] = dict(values=values)
+        if itype:
+            self['ids']['itype'] = itype
+    
+    def limit(self, value=0):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/limit-filter.html
+        A limit filter limits the number of documents (per shard) to execute on.
+        '''
+        if value>0:
+            self['limit'] = value
+
+    def type(self,value=None):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/type-filter.html
+Filters documents matching the provided document / mapping type. Note, this filter can work even when the _type field is not indexed (using the _uid field).
+        '''
+
+        if value: self['type'] = dict(value=value)
+
+    
 
