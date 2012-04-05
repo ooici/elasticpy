@@ -2,6 +2,8 @@ from setuptools import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
+import elasticpy
+
 setup(
     name='elasticpy',
     version='0.1',
