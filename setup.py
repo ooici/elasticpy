@@ -11,5 +11,5 @@ setup(
     url='http://lukecampbell.github.com',
     license='Apache 2.0',
     py_modules=['elasticpy'],
-    data_files = [('.', ['ChangeLog', 'LICENSE', 'README'])]
+    data_files = [('.', ['COPYING', 'README.md'])]
 )
