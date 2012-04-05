@@ -21,11 +21,10 @@ class ElasticSearch(object):
 
     def search_simple(self, index,itype, key, search_term):
         '''
-        Provides a simple interface to searching.
-        @param index Name of the index
-        @param itype Index type
-        @param key Search key or field
-        @param search_term the terms that should be matched
+        ElasticSearch.search_simple(index,itype,key,search_term)
+        Usage: 
+        > es = elasticpy.ElasticSearch()
+        > es.search_simple('twitter','users','name','kim')
         '''
         headers = {
             'Content-Type' : 'application/json'
@@ -150,6 +149,7 @@ class ElasticQuery(dict):
 
 
         '''
+        self['bool'] = dict()
         if must and isinstance(must,ElasticQuery):
             self['bool']['must'] = must.query()
         if should and isinstance(should,ElasticQuery):
@@ -160,7 +160,27 @@ class ElasticQuery(dict):
             self['bool']['minimum_number_should_match'] = minimum_number_should_match
         if boost > 0:
             self['bool']['boost'] = boost
-
-
+    
+    def ids(self, values=None, itype=''):
+        '''
+        ElasticQuery.ids(values=["1","4",..."n"], itype='my_type')
+        http://www.elasticsearch.org/guide/reference/query-dsl/ids-query.html
+        Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
+        > query = elasticpy.ElasticQuery()
+        > query.ids(['1','2'], type='tweets')
+        > query.query()
+          {
+            'ids' : {
+              'type' : 'tweets',
+              'values' : ['1','2']
+            }
+          }
+        '''
+        if not values: return
+        
+        self['ids'] = dict(values=values)
+       
+        if itype:
+            self['ids']['type'] = itype
 
 
