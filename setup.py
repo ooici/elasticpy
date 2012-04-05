@@ -9,5 +9,5 @@ setup(
     author='Luke Campbell',
     author_email='luke.s.campbell@gmail.com',
     url='http://lukecampbell.github.com',
-    packages=['elaticpy'],
+    packages=['elasticpy'],
 )
