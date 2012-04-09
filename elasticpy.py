@@ -58,7 +58,7 @@ class ElasticSearch(object):
         
         return json.loads(s)
 
-    def search_index_simple(index,key,search_term):
+    def search_index_simple(self,index,key,search_term):
         '''
         Search the index using a simple key and search_term
         @param index Name of the index
@@ -71,24 +71,6 @@ class ElasticSearch(object):
         url = 'http://%s:%s/%s/_search?q=%s:%s' % (self.host,self.port,index,key,search_term)
         url_request = urllib2.Request(url,None,headers)
         s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
-
-    def create(self,index,itype,name,data):
-
-        if not isinstance(data, dict): return
-        headers = {
-            'Content-Type' : 'application/json'
-        }
-        content = json.dumps(data)
-        if itype:
-            url = 'http://%s:%s/%s/%s/%s' % (self.host, self.port, index, itype, name)
-        else:
-            url = 'http://%s:%s/%s/%s' % (self.host, self.port, index, name)
-        
-        url_request = urllib2.Request(url,content,headers)
-
-        s = urllib2.urlopen(url_request).read()
-
         return json.loads(s)
             
 
