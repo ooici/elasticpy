@@ -10,6 +10,9 @@ Copyright 2012 Lucas Campbell
 Apache License 2.0
 See COPYING for more information.
 '''
+__author__ = 'Luke Campbell'
+__version__ = '0.1'
+
 
 import json
 import urllib2
@@ -265,6 +268,7 @@ class ElasticQuery(dict):
         '''
         if not query: return
         self['query_string'] = dict(
+            query=query,
             default_field=default_field,
             default_operator=default_operator,
             allow_leading_wildcard=allow_leading_wildcard,

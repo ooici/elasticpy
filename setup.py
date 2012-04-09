@@ -6,7 +6,7 @@ import elasticpy
 
 setup(
     name='elasticpy',
-    version='0.1',
+    version=elasticpy.__version__,
     description='Python Wrapper for elasticsearch',
     author='Luke Campbell',
     author_email='luke.s.campbell@gmail.com',
