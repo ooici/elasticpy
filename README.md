@@ -5,6 +5,39 @@ Python wrapper for the elasticsearch indexing utility.
 
 Author: Luke Campbell <luke.s.campbell@gmail.com>
 
+HOWTO
+-----
+
+To begin using elasticpy start by importing.
+    import elasticpy
+
+To interface with the elasticsearch server use the ElasticSearch object.
+
+    search = elasticpy.ElasticSearch()
+
+To form a query use the ElasticQuery objects.
+
+    query = elasticpy.ElasticQuery().term('users':'luke')
+    # and then pass it to the search object
+    search.search_advanced('twitter','feeds',query)
+    >   {u'_shards': {u'failed': 0, u'successful': 5, u'total': 5},
+         u'hits': {u'hits': [{u'_id': u'1',
+            u'_index': u'twitter',
+            u'_score': 0.30685282,
+            u'_source': {u'content': u'This is an example.', u'user': u'luke'},
+            u'_type': u'feeds'}],
+          u'max_score': 0.30685282,
+          u'total': 1},
+         u'timed_out': False,
+         u'took': 3}
+
+USAGE
+-----
+* ElasticSearch
+
+  - search_simple 
+
+
 Copying
 -----------
    Copyright 2012 Lucas Campbell
