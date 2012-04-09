@@ -36,12 +36,43 @@ USAGE
 
 * Simple Searching, queries ElasticSearch using GET on a url based query.
     
-        search_simple(index,type, key, search_term)
+        search_simple(index, type, key, search_term)
 
 * Advanced Searching, queries to ElasticSearch using a GET method and passing a JSON object containing the detailed query parameters, typically assembled by using an ElasticQuery object.
 
-        search_advanced(index, itype, query)
+        search_advanced(index, type, query)
 
+* Searching an index, the entails searching the entire index and all the types within.
+
+        search_index_simple(index, key, search_term)
+        search_index_advanced(index, query)
+
+* Queries closely match the query types specified by [QueryDSL](http://www.elasticsearch.org/guide/reference/query-dsl/) used in ElasticSearch. They are wrapped in python methods to make them creation of the objects easier to manage than JSON strings.
+
+        query = elasticpy.ElasticQuery().query_string(query='any')
+        query
+        >  {'query_string': {'allow_leading_wildcard': True,
+          'analyze_wildcard': None,
+          'auto_generate_phase_queries': False,
+          'boost': 1.0,
+          'default_field': '_all',
+          'default_operator': 'OR',
+          'enable_position_increments': True,
+          'fuzzy_min_sim': 0.5,
+          'fuzzy_prefix_length': 0,
+          'lowercase_expanded_terms': True,
+          'phrase_slop': 0,
+          'query': 'any'}}
+
+* Filters also closely match the [QueryDSL](http://www.elasticsearch.org/guide/reference/query-dsl/) just like query.
+
+        filter = elasticpy.ElasticFilter().term('user','luke').range('age',21,26)
+        filter
+        > {'range': {'age': {'from': 18,
+           'include_lower': True,
+           'include_upper': False,
+           'to': 25}},
+         'term': {'user': 'luke'}}
 
 
 Copying
