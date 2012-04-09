@@ -36,8 +36,11 @@ USAGE
 * ElasticSearch
 
   - Simple Searching, queries ElasticSearch using GET on a url based query.
+    
     search_simple(index,type, key, search_term)
+
   - Advanced Searching, queries to ElasticSearch using a GET method and passing a JSON object containing the detailed query parameters, typically assembled by using an ElasticQuery object.
+
     search_advanced(index, itype, query)
 
 
