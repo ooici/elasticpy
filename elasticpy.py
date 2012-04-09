@@ -75,6 +75,106 @@ class ElasticSearch(object):
         url_request = urllib2.Request(url,None,headers)
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
+
+    def search_index_advanced(self, index, query):
+        '''
+        Advanced search query against an entire index
+
+        > query = ElasticQuery().query_string(query='imchi')
+        > search = ElasticSearch()
+        '''
+        url = 'http://%s:%s/%s/_search' % (self.host, self.port, index)
+        content = {
+            'query' : query
+        }
+        content_json = json.dumps(content)
+        url_request = urllib2.Request(url,content_json)
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+
+    def index_create(self, index):
+        '''
+        Creates the specified index
+        > search = ElasticSearch()
+        > search.index_create('twitter')
+          {"ok":true,"acknowledged":true}
+        '''
+        url = 'http://%s:%s/%s' % (self.host, self.port, index)
+        url_request = urllib2.Request(url,None)
+        url_request.add_header('Content-Type','application/json')
+        url_request.get_method = lambda : 'PUT'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+    def index_delete(self, index):
+        '''
+        Delets the specified index
+        > search = ElasticSearch()
+        > search.index_delete('twitter')
+          {"ok" : True, "acknowledged" : True }
+        '''
+        url = 'http://%s:%s/%s' % (self.host, self.port, index)
+        url_request = urllib2.Request(url,None)
+        url_request.add_header('Content-Type','application/json')
+        url_request.get_method = lambda : 'DELETE'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+    def river_couchdb_create(self, index_name,index_type,couchdb_db, couchdb_host='localhost', couchdb_port='5984'):
+        '''
+        https://github.com/elasticsearch/elasticsearch-river-couchdb
+
+        Creates a river for the specified couchdb_db. 
+
+        > search = ElasticSearch()
+        > search.river_couchdb_create('feeds','feeds','feeds')
+          {u'_id': u'_meta',
+         u'_index': u'_river',
+         u'_type': u'test_db',
+         u'_version': 1,
+         u'ok': True} 
+        '''
+        content = {
+                'type' : 'couchdb',
+                'couchdb' : {
+                    'host' : couchdb_host,
+                    'port' : couchdb_port,
+                    'db' : couchdb_db,
+                    'filter' : None
+                    },
+                'index' : {
+                    'index' : index_name,
+                    'type' : index_type
+                    }
+                }
+        content_json = json.dumps(content)
+        url = 'http://%s:%s/_river/%s/_meta' %(self.host, self.port, index_name)
+
+        url_request = urllib2.Request(url, content_json)
+
+        url_request.add_header('Content-Type', 'application/json')
+        url_request.get_method = lambda : 'PUT'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+    def river_couchdb_delete(self, index_name):
+        '''
+        https://github.com/elasticsearch/elasticsearch-river-couchdb
+
+        Delete's a river for the specified index
+        WARNING: It DOES NOT delete the index, only the river, so the only effects of this are that the index will no longer poll CouchDB for updates.
+        '''
+        url = 'http://%s:%s/_river/%s' % (self.host, self.port, index_name)
+        url_request = urllib2.Request(url)
+        url_request.add_header('Content-Type', 'application/json')
+        url_request.get_method = lambda : 'DELETE'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+
+    
+
             
 
 class ElasticQuery(dict):
