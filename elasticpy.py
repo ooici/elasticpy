@@ -6,7 +6,7 @@
 @license Apache 2.0
 @description Wrapper for elastic search
 
-Copyright 2012 Lucas Campbell
+Copyright 2012 UC Regents
 Apache License 2.0
 See COPYING for more information.
 '''
@@ -24,10 +24,11 @@ class ElasticSearch(object):
     Uses simple HTTP queries (RESTful) with json to provide the interface.
     '''
     
-    def __init__(self, host='localhost',port='9200'):
+    def __init__(self, host='localhost',port='9200',verbose=False):
         self.host = host
         self.port = port
         self.params = None
+        self.verbose = verbose
 
     def timeout(self, value):
         '''
@@ -37,6 +38,17 @@ class ElasticSearch(object):
             self.params = dict(timeout=value)
             return self
         self.params['timeout'] = value
+        return self
+
+
+    def filtered(self, efilter):
+        '''
+        Applies a filter to the search
+        '''
+        if not self.params:
+            self.params={'filter' : efilter}
+            return self
+        self.params['filter'] = efilter
         return self
 
     def size(self,value):
@@ -91,7 +103,7 @@ class ElasticSearch(object):
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
-    def search_advanced(self, index, itype, query):
+    def search_advanced(self, index, itype, query,filter=None):
         '''
         Advanced search interface
         @param index Name of the index
@@ -107,12 +119,27 @@ class ElasticSearch(object):
         else:
             query_header = dict(query=query)
         content = json.dumps(query_header)
-
+        if self.verbose:
+            print content
         url_request = urllib2.Request(url,content,headers)
         s = urllib2.urlopen(url_request).read()
         
         return json.loads(s)
 
+    def doc_create(self,index,itype,value):
+        '''
+        Creates a document
+        '''
+        url = 'http://%s:%s/%s/%s/' % (self.host, self.port, index, itype)
+        content = json.dumps(value)
+        if self.verbose:
+            print content
+        url_request = urllib2.Request(url,content)
+        url_request.add_header('Content-Type','application/json')
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+    
     def search_index_simple(self,index,key,search_term):
         '''
         Search the index using a simple key and search_term
@@ -140,8 +167,10 @@ class ElasticSearch(object):
             content = dict(query=query, **self.params)
         else:
             content = dict(query=query)
-        content_json = json.dumps(content)
-        url_request = urllib2.Request(url,content_json)
+        content = json.dumps(content)
+        if self.verbose:
+            print content
+        url_request = urllib2.Request(url,content)
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
@@ -230,8 +259,34 @@ class ElasticSearch(object):
         return json.loads(s)
 
 
-    
+    def geo_map(self,index,itype,field):
+        '''
+        Sets up the map for geotype
+        See: https://gist.github.com/2352968
+        for a raw example
 
+        > ElasticSearch().geo_map('map','points','pin.location')
+        Adds a map for the element pin.location in map/points to geo_point
+        '''
+        url = 'http://%s:%s/%s/%s/_mapping' % (self.host, self.port, index, itype)
+        # This is gonna be ugly
+        levels = field.split('.')
+        levels.reverse()
+        content = {}
+        for i in xrange(len(levels)):
+            if i == 0:
+                content = {'properties' : { levels[i] : {'type' : 'geo_point' } } }
+                continue
+            content = {'properties' : { levels[i] : content }}
+        content = { itype : content }
+        content = json.dumps(content)
+        if self.verbose:
+            print content
+        url_request = urllib2.Request(url,content)
+        url_request.add_header('Content-Type','application/json')
+        url_request.get_method = lambda : 'PUT'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
             
 
 class ElasticQuery(dict):
