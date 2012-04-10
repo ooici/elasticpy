@@ -103,12 +103,13 @@ class ElasticSearch(object):
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
-    def search_advanced(self, index, itype, query,filter=None):
+    def search_advanced(self, index, itype, query):
         '''
-        Advanced search interface
-        @param index Name of the index
-        @param itype Index type
-        @param query Query (dictionary)
+        Advanced search interface using specified query
+        > query = ElasticQuery().term(user='kimchy')
+        > ElasticSearch().search_advanced('twitter','posts',query)
+         ... Search results ...
+
         '''
         headers = {
             'Content-Type' : 'application/json'
@@ -203,7 +204,7 @@ class ElasticSearch(object):
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
-    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', couchdb_host='localhost', couchdb_port='5984'):
+    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', couchdb_host='localhost', couchdb_port='5984',script=''):
         '''
         https://github.com/elasticsearch/elasticsearch-river-couchdb
 
@@ -234,7 +235,11 @@ class ElasticSearch(object):
                     'type' : index_type
                     }
                 }
+        if script:
+            content['couchdb']['script'] = script
         content_json = json.dumps(content)
+        if self.verbose:
+            print content_json
         url = 'http://%s:%s/_river/%s/_meta' %(self.host, self.port, index_name)
 
         url_request = urllib2.Request(url, content_json)
@@ -281,6 +286,7 @@ class ElasticSearch(object):
         content = { itype : content }
         content = json.dumps(content)
         if self.verbose:
+            print url
             print content
         url_request = urllib2.Request(url,content)
         url_request.add_header('Content-Type','application/json')
