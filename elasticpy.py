@@ -24,13 +24,6 @@ class ElasticSearch(object):
     Uses simple HTTP queries (RESTful) with json to provide the interface.
     '''
     
-    dfs_query_then_fetch = 'dfs_query_then_fetch'
-    dfs_query_and_fetch = 'dfs_query_and_fetch'
-    query_then_fetch = 'query_then_fetch'
-    query_and_fetch = 'query_and_fetch'
-    query_then_fetch = 'query_then_fetch'
-
-
     def __init__(self, host='localhost',port='9200'):
         self.host = host
         self.port = port
@@ -66,16 +59,22 @@ class ElasticSearch(object):
         self.params['from'] = value
         return self
 
-    def search_type(self,value):
+    def sort(self, *args, **kwargs):
         '''
-        The type of the search operation to perform. Can be dfs_query_then_fetch, dfs_query_and_fetch, query_then_fetch, query_and_fetch. Defaults to query_then_fetch.
+        http://www.elasticsearch.org/guide/reference/api/search/sort.html
+        Allows to add one or more sort on specific fields. Each sort can be reversed as well. The sort is defined on a per field level, with special field name for _score to sort by score.
+
+        standard arguments are ordered ascending, keyword arguments are fields and you specify the order either asc or desc
         '''
         if not self.params:
-            self.params = dict(search_type=value)
-            return self
-        self.params['search_type'] = value
-        return self
+            self.params = dict()
+        self.params['sort'] = list()
+        for arg in args:
+            self.params['sort'].append(arg)
+        for k,v in kwargs.iteritems():
+            self.params['sort'].append({k : v})
 
+        return self
 
     def search_simple(self, index,itype, key, search_term):
         '''
