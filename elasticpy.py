@@ -336,6 +336,29 @@ class ElasticQuery(dict):
         self['fuzzy'] = { field : dict(value=value, boost=boost, min_similarity=min_similarity, prefix_length=prefix_length)}
         return self
 
+    def fuzzy_like_this(self, like_text, fields='_all', ignore_tf=False, max_query_terms=25, min_similarity=0.5, prefix_length=0, boost=1.0, analyzer=None):
+        '''
+        http://www.elasticsearch.org/guide/reference/query-dsl/flt-query.html
+        Fuzzy like this query find documents that are "like" provided text by running it against one or more fields.
+
+        > query = ElasticQuery().fuzzy_like_this('text like this one', fields=['name.first', 'name.last'], max_query_terms=12)
+        > query
+            {'fuzze_like_this': {'boost': 1.0,
+              'fields': ['name.first', 'name.last'],
+              'ifgnore_tf': False,
+              'like_text': 'text like this one',
+              'max_query_terms': 12,
+              'min_similarity': 0.5,
+              'prefix_length': 0}}
+
+        '''
+        self['fuzze_like_this'] = dict(fields=fields, like_text=like_text, ifgnore_tf=ignore_tf, max_query_terms=max_query_terms, min_similarity=min_similarity, prefix_length=prefix_length, boost=boost)
+        if analyzer:
+            self['fuzzy_like_this']['analyzer'] = analyzer
+
+        return self
+        
+
     def has_child(self, child_type, query):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/has-child-query.html
