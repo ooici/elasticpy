@@ -77,7 +77,9 @@ USAGE
 
 Copying
 -----------
-   Copyright 2012 Lucas Campbell
+
+   elasticpy - Python Wrapper for ElasticSearch
+   Copyright 2012 UC Regents
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
