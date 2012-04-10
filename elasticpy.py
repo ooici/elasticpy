@@ -23,9 +23,59 @@ class ElasticSearch(object):
     ElasticSearch wrapper for python.
     Uses simple HTTP queries (RESTful) with json to provide the interface.
     '''
+    
+    dfs_query_then_fetch = 'dfs_query_then_fetch'
+    dfs_query_and_fetch = 'dfs_query_and_fetch'
+    query_then_fetch = 'query_then_fetch'
+    query_and_fetch = 'query_and_fetch'
+    query_then_fetch = 'query_then_fetch'
+
+
     def __init__(self, host='localhost',port='9200'):
         self.host = host
         self.port = port
+        self.params = None
+
+    def timeout(self, value):
+        '''
+        Specifies a timeout on the search query
+        '''
+        if not self.params:
+            self.params = dict(timeout=value)
+            return self
+        self.params['timeout'] = value
+        return self
+
+    def size(self,value):
+        '''
+        The number of hits to return. Defaults to 10
+        '''
+        if not self.params:
+            self.params = dict(size=value)
+            return self
+        self.params['timeout'] = value
+        return self
+
+    def from_offset(self, value):
+        '''
+        The starting from index of the hits to return. Defaults to 0.
+        '''
+        if not self.params:
+            self.params = dict({'from':value})
+            return self
+        self.params['from'] = value
+        return self
+
+    def search_type(self,value):
+        '''
+        The type of the search operation to perform. Can be dfs_query_then_fetch, dfs_query_and_fetch, query_then_fetch, query_and_fetch. Defaults to query_then_fetch.
+        '''
+        if not self.params:
+            self.params = dict(search_type=value)
+            return self
+        self.params['search_type'] = value
+        return self
+
 
     def search_simple(self, index,itype, key, search_term):
         '''
@@ -53,7 +103,10 @@ class ElasticSearch(object):
             'Content-Type' : 'application/json'
         }
         url = 'http://%s:%s/%s/%s/_search' % (self.host,self.port,index,itype)
-        query_header = {'query' : query }
+        if self.params:
+            query_header = dict(query=query, **self.params)
+        else:
+            query_header = dict(query=query)
         content = json.dumps(query_header)
 
         url_request = urllib2.Request(url,content,headers)
@@ -84,9 +137,10 @@ class ElasticSearch(object):
         > search = ElasticSearch()
         '''
         url = 'http://%s:%s/%s/_search' % (self.host, self.port, index)
-        content = {
-            'query' : query
-        }
+        if self.params:
+            content = dict(query=query, **self.params)
+        else:
+            content = dict(query=query)
         content_json = json.dumps(content)
         url_request = urllib2.Request(url,content_json)
         s = urllib2.urlopen(url_request).read()
