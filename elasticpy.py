@@ -11,7 +11,7 @@ Apache License 2.0
 See COPYING for more information.
 '''
 __author__ = 'Luke Campbell'
-__version__ = '0.1'
+__version__ = '0.2'
 
 
 import json
@@ -204,7 +204,7 @@ class ElasticSearch(object):
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
-    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', couchdb_host='localhost', couchdb_port='5984',script=''):
+    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', river_name='',couchdb_host='localhost', couchdb_port='5984',script=''):
         '''
         https://github.com/elasticsearch/elasticsearch-river-couchdb
 
@@ -240,7 +240,7 @@ class ElasticSearch(object):
         content_json = json.dumps(content)
         if self.verbose:
             print content_json
-        url = 'http://%s:%s/_river/%s/_meta' %(self.host, self.port, index_name)
+        url = 'http://%s:%s/_river/%s/_meta' %(self.host, self.port, river_name or index_name)
 
         url_request = urllib2.Request(url, content_json)
 
