@@ -176,15 +176,19 @@ class ElasticSearch(object):
         return json.loads(s)
 
 
-    def index_create(self, index):
+    def index_create(self, index, number_of_shards=5,number_of_replicas=1):
         '''
         Creates the specified index
         > search = ElasticSearch()
         > search.index_create('twitter')
           {"ok":true,"acknowledged":true}
         '''
+        content = {'settings' : dict(number_of_shards=number_of_shards, number_of_replicas=number_of_replicas)}
+        content = json.dumps(content)
+        if(self.verbose):
+            print content
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
-        url_request = urllib2.Request(url,None)
+        url_request = urllib2.Request(url,content)
         url_request.add_header('Content-Type','application/json')
         url_request.get_method = lambda : 'PUT'
         s = urllib2.urlopen(url_request).read()
@@ -198,6 +202,34 @@ class ElasticSearch(object):
           {"ok" : True, "acknowledged" : True }
         '''
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
+        url_request = urllib2.Request(url,None)
+        url_request.add_header('Content-Type','application/json')
+        url_request.get_method = lambda : 'DELETE'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+
+    def index_open(self, index):
+        '''
+        Opens the speicified index.
+        http://www.elasticsearch.org/guide/reference/api/admin-indices-open-close.html
+
+        > ElasticSearch().index_open('my_index')
+        '''
+        url = 'http://%s:%s/%s/_open' % (self.host, self.port, index)
+        url_request = urllib2.Request(url,None)
+        url_request.add_header('Content-Type','application/json')
+        url_request.get_method = lambda : 'DELETE'
+        s = urllib2.urlopen(url_request).read()
+        return json.loads(s)
+    
+    def index_close(self, index):
+        '''
+        Closes the speicified index.
+        http://www.elasticsearch.org/guide/reference/api/admin-indices-open-close.html
+
+        > ElasticSearch().index_close('my_index')
+        '''
+        url = 'http://%s:%s/%s/_close' % (self.host, self.port, index)
         url_request = urllib2.Request(url,None)
         url_request.add_header('Content-Type','application/json')
         url_request.get_method = lambda : 'DELETE'
