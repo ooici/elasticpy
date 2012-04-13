@@ -10,7 +10,14 @@ setup(
     author='Luke Campbell',
     author_email='LCampbell@ASAScience.com',
     url='http://github.com/ooici/elasticpy/',
+    classifiers=[
+        'License :: OSI Approved :: Apache Software License',
+        'Topic :: Database :: Front-Ends',
+        'Topic :: System :: Software Distribution',
+        'Topic :: System :: Systems Administration',
+        'Topic :: Utilities'
+        ],
     license='Apache 2.0',
-    py_modules=['elasticpy'],
-    data_files = [('.', ['COPYING', 'README.md'])]
+    keywords='elasticsearch search wrapper',
+    py_modules=['elasticpy']
 )
