@@ -11,7 +11,7 @@ Apache License 2.0
 See COPYING for more information.
 '''
 __author__ = 'Luke Campbell'
-__version__ = '0.2'
+__version__ = '0.3'
 
 
 import json
