@@ -325,6 +325,18 @@ class ElasticSearch(object):
         url_request.get_method = lambda : 'PUT'
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
+
+
+    def index_list(self):
+        '''
+        Lists indices
+        '''
+
+        url = 'http://%s:%s/_status' % (self.host, self.port)
+        request = urllib2.Request(url,None)
+        request.add_header('Content-Type','json')
+        response = json.loads(urllib2.urlopen(request).read())
+        return response['indices'].keys()
             
 
 class ElasticQuery(dict):
