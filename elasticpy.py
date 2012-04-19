@@ -11,7 +11,7 @@ Apache License 2.0
 See COPYING for more information.
 '''
 __author__ = 'Luke Campbell'
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 import json
@@ -354,7 +354,19 @@ class ElasticSearch(object):
         request.get_method = lambda : 'PUT'
         s = urllib2.urlopen(request).read()
         return json.loads(s)
-        
+
+    def type_list(self, index_name):
+        '''
+        List the types available in an index
+        '''
+        url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
+        request = urllib2.Request(url, None)
+        request.add_header('Content-Type','application/json')
+        if self.verbose:
+            print url
+        s = urllib2.urlopen(request).read()
+        return json.loads(s)
+
 
 class ElasticQuery(dict):
     '''
