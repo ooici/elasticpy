@@ -137,7 +137,7 @@ class ElasticSearch(object):
             print content
         url_request = urllib2.Request(url,content)
         url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'PUT'
+        url_request.get_method = lambda : 'POST'
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
