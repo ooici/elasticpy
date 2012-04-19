@@ -364,8 +364,8 @@ class ElasticSearch(object):
         request.add_header('Content-Type','application/json')
         if self.verbose:
             print url
-        s = urllib2.urlopen(request).read()
-        return json.loads(s)
+        response = json.loads(urllib2.urlopen(request).read())
+        return response[index_name].keys()
 
 
 class ElasticQuery(dict):
