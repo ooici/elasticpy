@@ -261,7 +261,7 @@ class ElasticSearch(object):
                     'host' : couchdb_host,
                     'port' : couchdb_port,
                     'db' : couchdb_db,
-                    'filter' : couch_filter
+                    'filter' : couchdb_filter
                     },
                 'index' : {
                     'index' : index_name,
