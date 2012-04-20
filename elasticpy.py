@@ -367,6 +367,19 @@ class ElasticSearch(object):
         response = json.loads(urllib2.urlopen(request).read())
         return response[index_name].keys()
 
+    def raw(self, module, method, data):
+        '''
+        Submits or requsts raw input
+        '''
+        url = 'http://%s:%s/%s' % (self.host, self.port, module)
+        content = json.dumps(data)
+        if self.verbose:
+            print content
+        request = urllib2.Request(url,content)
+        request.add_header('Content-Type','application/json')
+        request.get_method = lambda : method
+        response = json.loads(urllib2.urlopen(request).read())
+        return response
 
 class ElasticQuery(dict):
     '''
