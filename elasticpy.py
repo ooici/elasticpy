@@ -237,7 +237,7 @@ class ElasticSearch(object):
         s = urllib2.urlopen(url_request).read()
         return json.loads(s)
 
-    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', river_name='',couchdb_host='localhost', couchdb_port='5984',couchdb_filter=None,script=''):
+    def river_couchdb_create(self, index_name,index_type='',couchdb_db='', river_name='',couchdb_host='localhost', couchdb_port='5984',couchdb_user=None, couchdb_password=None, couchdb_filter=None,script=''):
         '''
         https://github.com/elasticsearch/elasticsearch-river-couchdb
 
@@ -268,6 +268,9 @@ class ElasticSearch(object):
                     'type' : index_type
                     }
                 }
+        if couchdb_user and couchdb_password:
+            content['couchdb']['user'] = couchdb_user
+            content['couchdb']['password'] = couchdb_password
         if script:
             content['couchdb']['script'] = script
         content_json = json.dumps(content)
