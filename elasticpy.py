@@ -370,7 +370,7 @@ class ElasticSearch(object):
         response = json.loads(urllib2.urlopen(request).read())
         return response[index_name].keys()
 
-    def raw(self, module, method, data):
+    def raw(self, module, method='GET', data=None):
         '''
         Submits or requsts raw input
         '''
