@@ -366,7 +366,7 @@ class ElasticSearch(object):
         request = ElasticConnection()
         url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
         response = request.get(url)
-        if response.status_code == 200:
+        if request.status_code == 200:
             return response[index_name].keys()
         else:
             return response
