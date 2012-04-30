@@ -11,7 +11,7 @@ Apache License 2.0
 See COPYING for more information.
 '''
 __author__ = 'Luke Campbell'
-__version__ = '0.6'
+__version__ = '0.7'
 
 
 import json
@@ -366,7 +366,7 @@ class ElasticSearch(object):
         request = ElasticConnection()
         url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
         response = request.get(url)
-        if response.status_code == 200:
+        if request.status_code == 200:
             return response[index_name].keys()
         else:
             return response
