@@ -133,6 +133,10 @@ class ElasticSearch(object):
 
         return self
 
+    @staticmethod
+    def search(index,itype,key,query,host='localhost',port='9200'):
+        return ElasticSearch(host=host,port=port).search_simple(index,itype,key,query)
+
     def search_simple(self, index,itype, key, search_term):
         '''
         ElasticSearch.search_simple(index,itype,key,search_term)
@@ -316,6 +320,14 @@ class ElasticSearch(object):
         return response
 
 
+    @staticmethod
+    def list_indexes(host='localhost',port='9200'):
+        '''
+        Lists indices
+        '''
+        return ElasticSearch(host,port).index_list()
+
+
     def index_list(self):
         '''
         Lists indices
@@ -340,6 +352,13 @@ class ElasticSearch(object):
         response = request.put(url,content)
         return response
 
+    @staticmethod
+    def list_types(index_name, host='localhost',port='9200'):
+        '''
+        Lists the context types available in an index
+        '''
+        return ElasticSearch().type_list(index_name)
+
     def type_list(self, index_name):
         '''
         List the types available in an index
@@ -352,6 +371,10 @@ class ElasticSearch(object):
         else:
             return response
 
+    @staticmethod
+    def raw_query(self, module, method='GET', data=None, host='localhost',port='9200'):
+        return ElasticSearch(host=host,port=port).raw(module,method,data)
+    
     def raw(self, module, method='GET', data=None):
         '''
         Submits or requsts raw input
@@ -392,7 +415,7 @@ class ElasticQuery(dict):
             self['terms'] = dict(**kwargs)
         else:
             self['term'] = dict(**kwargs)
-
+        
         return self
     def text(self, field, query, operator):
         '''
@@ -410,8 +433,8 @@ class ElasticQuery(dict):
         '''
         self['text'] = {field : query}
         if operator and (operator=='and' or operator=='or'): self['text']['operator'] = operator
-
         return self
+    
     def bool(self,must=None, should=None, must_not=None,minimum_number_should_match=-1, boost=-1):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/bool-query.html
