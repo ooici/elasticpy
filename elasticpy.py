@@ -15,8 +15,53 @@ __version__ = '0.6'
 
 
 import json
-import urllib2
+import requests
 import sys
+
+class ElasticConnection(object):
+    def __init__(self):
+        self.status_code = 0
+    def get(self, url):
+        headers = {'Content-Type' : 'Application/json'}
+        try:
+            response = requests.get(url,headers=headers)
+        except requests.ConnectionError as e:
+            self.status_code = 0
+            return {'error':e.message}
+        self.status_code = response.status_code
+        return json.loads(response.text)
+    def post(self, url, data):
+        headers = {'Content-Type' : 'Application/json'}
+        body = json.dumps(data)
+        try:
+            response = requests.post(url,data=body,headers=headers)
+        except requests.ConnectionError as e:
+            self.status_code = 0
+            return {'error' : e.message}
+        self.status_code = response.status_code
+        return json.loads(response.text)
+
+    def put(self, url, data):
+        headers = {'Content-Type' : 'Application/json'}
+        body = json.dumps(data)
+        try:
+            response = requests.post(url,data=body,headers=headers)
+        except requests.ConnectionError as e:
+            self.status_code = 0
+            return {'error' : e.message}
+        self.status_code = response.status_code
+        return json.loads(response.text)
+
+    def delete(self,url):
+        headers = {'Content-Type' : 'Application/json'}
+        try:
+            response = requests.delete(url,headers=headers)
+        except requests.ConnectionError as e:
+            self.status_code = 0
+            return {'error' : e.message}
+        self.status_code = response.status_code
+        return json.loads(response.text)
+        
 
 class ElasticSearch(object):
     '''
@@ -95,13 +140,11 @@ class ElasticSearch(object):
         > es = ElasticSearch()
         > es.search_simple('twitter','users','name','kim')
         '''
-        headers = {
-            'Content-Type' : 'application/json'
-        }
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/%s/_search?q=%s:%s' % (self.host,self.port,index,itype,key,search_term)
-        url_request = urllib2.Request(url,None,headers)
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.get(url)
+        
+        return response
 
     def search_advanced(self, index, itype, query):
         '''
@@ -111,35 +154,28 @@ class ElasticSearch(object):
          ... Search results ...
 
         '''
-        headers = {
-            'Content-Type' : 'application/json'
-        }
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/%s/_search' % (self.host,self.port,index,itype)
         if self.params:
             query_header = dict(query=query, **self.params)
         else:
             query_header = dict(query=query)
-        content = json.dumps(query_header)
         if self.verbose:
-            print content
-        url_request = urllib2.Request(url,content,headers)
-        s = urllib2.urlopen(url_request).read()
-        
-        return json.loads(s)
+            print query_header
+        response = request.post(url,query_header)
+
+        return response
 
     def doc_create(self,index,itype,value):
         '''
         Creates a document
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/%s/' % (self.host, self.port, index, itype)
-        content = json.dumps(value)
         if self.verbose:
-            print content
-        url_request = urllib2.Request(url,content)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'POST'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+            print value
+        response = request.post(url,value)
+        return response
 
     
     def search_index_simple(self,index,key,search_term):
@@ -149,13 +185,10 @@ class ElasticSearch(object):
         @param key Search Key
         @param search_term The term to be searched for
         '''
-        headers = {
-            'Content-Type' : 'application/json'
-        }
+        request = EalsticConnection()
         url = 'http://%s:%s/%s/_search?q=%s:%s' % (self.host,self.port,index,key,search_term)
-        url_request = urllib2.Request(url,None,headers)
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.get(url)
+        return response
 
     def search_index_advanced(self, index, query):
         '''
@@ -164,17 +197,16 @@ class ElasticSearch(object):
         > query = ElasticQuery().query_string(query='imchi')
         > search = ElasticSearch()
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/_search' % (self.host, self.port, index)
         if self.params:
             content = dict(query=query, **self.params)
         else:
             content = dict(query=query)
-        content = json.dumps(content)
         if self.verbose:
             print content
-        url_request = urllib2.Request(url,content)
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.post(url,content)
+        return response
 
 
     def index_create(self, index, number_of_shards=5,number_of_replicas=1):
@@ -184,16 +216,13 @@ class ElasticSearch(object):
         > search.index_create('twitter')
           {"ok":true,"acknowledged":true}
         '''
+        request = ElasticConnection()
         content = {'settings' : dict(number_of_shards=number_of_shards, number_of_replicas=number_of_replicas)}
-        content = json.dumps(content)
         if(self.verbose):
             print content
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
-        url_request = urllib2.Request(url,content)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'PUT'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.put(url,content)
+        return response
 
     def index_delete(self, index):
         '''
@@ -202,12 +231,10 @@ class ElasticSearch(object):
         > search.index_delete('twitter')
           {"ok" : True, "acknowledged" : True }
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
-        url_request = urllib2.Request(url,None)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'DELETE'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.delete(url)
+        return response
 
     def index_open(self, index):
         '''
@@ -216,12 +243,10 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_open('my_index')
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/_open' % (self.host, self.port, index)
-        url_request = urllib2.Request(url,None)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'DELETE'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.post(url,None)
+        return response
     
     def index_close(self, index):
         '''
@@ -230,12 +255,10 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_close('my_index')
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/_close' % (self.host, self.port, index)
-        url_request = urllib2.Request(url,None)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'DELETE'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.post(url,None)
+        return response
 
     def river_couchdb_create(self, index_name,index_type='',couchdb_db='', river_name='',couchdb_host='localhost', couchdb_port='5984',couchdb_user=None, couchdb_password=None, couchdb_filter=None,script=''):
         '''
@@ -251,6 +274,7 @@ class ElasticSearch(object):
          u'_version': 1,
          u'ok': True} 
         '''
+        request = ElasticConnection()
         if not index_type:
             index_type = index_name
         if not couchdb_db:
@@ -273,17 +297,11 @@ class ElasticSearch(object):
             content['couchdb']['password'] = couchdb_password
         if script:
             content['couchdb']['script'] = script
-        content_json = json.dumps(content)
         if self.verbose:
-            print content_json
+            print content
         url = 'http://%s:%s/_river/%s/_meta' %(self.host, self.port, river_name or index_name)
-
-        url_request = urllib2.Request(url, content_json)
-
-        url_request.add_header('Content-Type', 'application/json')
-        url_request.get_method = lambda : 'PUT'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.post(url,content)
+        return response
 
     def river_couchdb_delete(self, index_name):
         '''
@@ -292,96 +310,67 @@ class ElasticSearch(object):
         Delete's a river for the specified index
         WARNING: It DOES NOT delete the index, only the river, so the only effects of this are that the index will no longer poll CouchDB for updates.
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/_river/%s' % (self.host, self.port, index_name)
-        url_request = urllib2.Request(url)
-        url_request.add_header('Content-Type', 'application/json')
-        url_request.get_method = lambda : 'DELETE'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
-
-
-    def geo_map(self,index,itype,field):
-        '''
-        Sets up the map for geotype
-        See: https://gist.github.com/2352968
-        for a raw example
-
-        > ElasticSearch().geo_map('map','points','pin.location')
-        Adds a map for the element pin.location in map/points to geo_point
-        '''
-        url = 'http://%s:%s/%s/%s/_mapping' % (self.host, self.port, index, itype)
-        # This is gonna be ugly
-        levels = field.split('.')
-        levels.reverse()
-        content = {}
-        for i in xrange(len(levels)):
-            if i == 0:
-                content = {'properties' : { levels[i] : {'type' : 'geo_point' } } }
-                continue
-            content = {'properties' : { levels[i] : content }}
-        content = { itype : content }
-        content = json.dumps(content)
-        if self.verbose:
-            print url
-            print content
-        url_request = urllib2.Request(url,content)
-        url_request.add_header('Content-Type','application/json')
-        url_request.get_method = lambda : 'PUT'
-        s = urllib2.urlopen(url_request).read()
-        return json.loads(s)
+        response = request.delete(url)
+        return response
 
 
     def index_list(self):
         '''
         Lists indices
         '''
-
+        request = ElasticConnection()
         url = 'http://%s:%s/_status' % (self.host, self.port)
-        request = urllib2.Request(url,None)
-        request.add_header('Content-Type','json')
-        response = json.loads(urllib2.urlopen(request).read())
-        return response['indices'].keys()
+        response = request.get(url)
+        if request.status_code==200:
+            return response['indices'].keys()
+        else:
+            return response
             
     def map(self,index_name, index_type, map_value):
         '''
         Enable a specific map for an index and type
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/%s/_mapping' % (self.host, self.port, index_name, index_type)
         content = { index_type : { 'properties' : map_value } }
-        content = json.dumps(content)
         if self.verbose:
-            print url
             print content
-        request = urllib2.Request(url,content)
-        request.add_header('Content-Type','application/json')
-        request.get_method = lambda : 'PUT'
-        s = urllib2.urlopen(request).read()
-        return json.loads(s)
+        response = request.put(url,content)
+        return response
 
     def type_list(self, index_name):
         '''
         List the types available in an index
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
-        request = urllib2.Request(url, None)
-        request.add_header('Content-Type','application/json')
-        if self.verbose:
-            print url
-        response = json.loads(urllib2.urlopen(request).read())
-        return response[index_name].keys()
+        response = request.get(url)
+        if response.status_code == 200:
+            return response[index_name].keys()
+        else:
+            return response
 
     def raw(self, module, method='GET', data=None):
         '''
         Submits or requsts raw input
         '''
+        request = ElasticConnection()
         url = 'http://%s:%s/%s' % (self.host, self.port, module)
-        content = json.dumps(data)
         if self.verbose:
             print content
-        request = urllib2.Request(url,content)
-        request.add_header('Content-Type','application/json')
-        request.get_method = lambda : method
-        response = json.loads(urllib2.urlopen(request).read())
+        if method=='GET':
+            response = request.get(url)
+        elif method=='POST':
+            response = request.post(url,data)
+        elif method=='PUT':
+            response = request.put(url,data)
+        elif method=='DELETE':
+            response = request.delete(url)
+        else:
+            return {'error' : 'No such request method %s' % method}
+
         return response
 
 class ElasticQuery(dict):
