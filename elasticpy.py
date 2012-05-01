@@ -19,12 +19,14 @@ import requests
 import sys
 
 class ElasticConnection(object):
-    def __init__(self):
+    def __init__(self, timeout=None):
         self.status_code = 0
+        self.timeout=timeout
+        
     def get(self, url):
         headers = {'Content-Type' : 'Application/json'}
         try:
-            response = requests.get(url,headers=headers)
+            response = requests.get(url,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error':e.message}
@@ -34,7 +36,7 @@ class ElasticConnection(object):
         headers = {'Content-Type' : 'Application/json'}
         body = json.dumps(data)
         try:
-            response = requests.post(url,data=body,headers=headers)
+            response = requests.post(url,data=body,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}
@@ -45,7 +47,7 @@ class ElasticConnection(object):
         headers = {'Content-Type' : 'Application/json'}
         body = json.dumps(data)
         try:
-            response = requests.post(url,data=body,headers=headers)
+            response = requests.post(url,data=body,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}
@@ -55,7 +57,7 @@ class ElasticConnection(object):
     def delete(self,url):
         headers = {'Content-Type' : 'Application/json'}
         try:
-            response = requests.delete(url,headers=headers)
+            response = requests.delete(url,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}
@@ -69,11 +71,12 @@ class ElasticSearch(object):
     Uses simple HTTP queries (RESTful) with json to provide the interface.
     '''
     
-    def __init__(self, host='localhost',port='9200',verbose=False):
+    def __init__(self, host='localhost',port='9200',timeout=None,verbose=False):
         self.host = host
         self.port = port
         self.params = None
         self.verbose = verbose
+        self.timeout = timeout
 
     def timeout(self, value):
         '''
@@ -144,7 +147,7 @@ class ElasticSearch(object):
         > es = ElasticSearch()
         > es.search_simple('twitter','users','name','kim')
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/%s/_search?q=%s:%s' % (self.host,self.port,index,itype,key,search_term)
         response = request.get(url)
         
@@ -158,7 +161,7 @@ class ElasticSearch(object):
          ... Search results ...
 
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/%s/_search' % (self.host,self.port,index,itype)
         if self.params:
             query_header = dict(query=query, **self.params)
@@ -174,7 +177,7 @@ class ElasticSearch(object):
         '''
         Creates a document
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/%s/' % (self.host, self.port, index, itype)
         if self.verbose:
             print value
@@ -201,7 +204,7 @@ class ElasticSearch(object):
         > query = ElasticQuery().query_string(query='imchi')
         > search = ElasticSearch()
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/_search' % (self.host, self.port, index)
         if self.params:
             content = dict(query=query, **self.params)
@@ -220,7 +223,7 @@ class ElasticSearch(object):
         > search.index_create('twitter')
           {"ok":true,"acknowledged":true}
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         content = {'settings' : dict(number_of_shards=number_of_shards, number_of_replicas=number_of_replicas)}
         if(self.verbose):
             print content
@@ -235,7 +238,7 @@ class ElasticSearch(object):
         > search.index_delete('twitter')
           {"ok" : True, "acknowledged" : True }
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
         response = request.delete(url)
         return response
@@ -247,7 +250,7 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_open('my_index')
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/_open' % (self.host, self.port, index)
         response = request.post(url,None)
         return response
@@ -259,7 +262,7 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_close('my_index')
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/_close' % (self.host, self.port, index)
         response = request.post(url,None)
         return response
@@ -278,7 +281,7 @@ class ElasticSearch(object):
          u'_version': 1,
          u'ok': True} 
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         if not index_type:
             index_type = index_name
         if not couchdb_db:
@@ -314,7 +317,7 @@ class ElasticSearch(object):
         Delete's a river for the specified index
         WARNING: It DOES NOT delete the index, only the river, so the only effects of this are that the index will no longer poll CouchDB for updates.
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/_river/%s' % (self.host, self.port, index_name)
         response = request.delete(url)
         return response
@@ -332,7 +335,7 @@ class ElasticSearch(object):
         '''
         Lists indices
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/_status' % (self.host, self.port)
         response = request.get(url)
         if request.status_code==200:
@@ -344,7 +347,7 @@ class ElasticSearch(object):
         '''
         Enable a specific map for an index and type
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/%s/_mapping' % (self.host, self.port, index_name, index_type)
         content = { index_type : { 'properties' : map_value } }
         if self.verbose:
@@ -363,7 +366,7 @@ class ElasticSearch(object):
         '''
         List the types available in an index
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
         response = request.get(url)
         if request.status_code == 200:
@@ -379,7 +382,7 @@ class ElasticSearch(object):
         '''
         Submits or requsts raw input
         '''
-        request = ElasticConnection()
+        request = ElasticConnection(timeout=self.timeout)
         url = 'http://%s:%s/%s' % (self.host, self.port, module)
         if self.verbose:
             print content
@@ -644,7 +647,7 @@ class ElasticQuery(dict):
         > query = ElasticQuery().range('age', from_value=10, to_value=20, boost=2.0)
         '''
 
-        if not (field and from_value and to_value): return
+        if field is None or from_value is None or to_value is None: return
         self['range'] = {field : { 'from' : from_value, 'to' : to_value, 'include_lower' : include_lower, 'include_upper' : include_upper, 'boost' : boost}}
         return self
 
@@ -889,7 +892,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents with fields that have terms within a certain range. Similar to range query, except that it acts as a filter. Can be placed within queries that accept a filter.
         '''
 
-        if not (field and from_value and to_value): return
+        if field is None or from_value is None or to_value is None: return 
         self['range'] = {field : { 'from' : from_value, 'to' : to_value, 'include_lower' : include_lower, 'include_upper' : include_upper}}
 
         return self
