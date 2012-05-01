@@ -647,7 +647,7 @@ class ElasticQuery(dict):
         > query = ElasticQuery().range('age', from_value=10, to_value=20, boost=2.0)
         '''
 
-        if not (field and from_value and to_value): return
+        if field is None or from_value is None or to_value is None: return
         self['range'] = {field : { 'from' : from_value, 'to' : to_value, 'include_lower' : include_lower, 'include_upper' : include_upper, 'boost' : boost}}
         return self
 
@@ -892,7 +892,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents with fields that have terms within a certain range. Similar to range query, except that it acts as a filter. Can be placed within queries that accept a filter.
         '''
 
-        if not (field and from_value and to_value): return
+        if field is None or from_value is None or to_value is None: return 
         self['range'] = {field : { 'from' : from_value, 'to' : to_value, 'include_lower' : include_lower, 'include_upper' : include_upper}}
 
         return self
