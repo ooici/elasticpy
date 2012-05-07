@@ -106,7 +106,7 @@ class ElasticSearch(object):
         if not self.params:
             self.params = dict(size=value)
             return self
-        self.params['timeout'] = value
+        self.params['size'] = value
         return self
 
     def from_offset(self, value):
