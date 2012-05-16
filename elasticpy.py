@@ -96,7 +96,7 @@ class ElasticSearch(object):
         if not self.params:
             self.params={'filter' : efilter}
             return self
-        self.params['filter'] = efilter
+        self.params['filter'].update(efilter)
         return self
 
     def size(self,value):
