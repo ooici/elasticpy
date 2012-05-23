@@ -5,7 +5,7 @@ from distutils.extension import Extension
 
 setup(
     name='elasticpy',
-    version='0.7',
+    version='0.8',
     description='Python Wrapper for elasticsearch',
     author='Luke Campbell',
     author_email='LCampbell@ASAScience.com',
