@@ -336,10 +336,10 @@ class ElasticSearch(object):
         Lists indices
         '''
         request = ElasticConnection(timeout=self.timeout)
-        url = 'http://%s:%s/_status' % (self.host, self.port)
+        url = 'http://%s:%s/_cluster/state/' % (self.host, self.port)
         response = request.get(url)
         if request.status_code==200:
-            return response['indices'].keys()
+            return response.get('metadata',{}).get('indices',{}).keys()
         else:
             return response
             
