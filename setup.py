@@ -19,7 +19,7 @@ setup(
         ],
     license='Apache 2.0',
     keywords='elasticsearch search wrapper',
-    py_modules=['elasticpy'],
+    packages=['elasticpy'],
     install_requires = [
         'Requests==0.11.2'
     ],
