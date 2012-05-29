@@ -1,11 +1,9 @@
 from setuptools import setup
 from distutils.extension import Extension
 
-
-
 setup(
     name='elasticpy',
-    version='0.7',
+    version='0.8',
     description='Python Wrapper for elasticsearch',
     author='Luke Campbell',
     author_email='LCampbell@ASAScience.com',
@@ -19,9 +17,9 @@ setup(
         ],
     license='Apache 2.0',
     keywords='elasticsearch search wrapper',
-    py_modules=['elasticpy'],
+    packages=['elasticpy'],
     install_requires = [
-        'Requests==0.11.2'
+        'Requests==0.12.1'
     ],
 
 )
