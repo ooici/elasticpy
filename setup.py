@@ -1,8 +1,6 @@
 from setuptools import setup
 from distutils.extension import Extension
 
-
-
 setup(
     name='elasticpy',
     version='0.8',
@@ -21,7 +19,7 @@ setup(
     keywords='elasticsearch search wrapper',
     packages=['elasticpy'],
     install_requires = [
-        'Requests==0.11.2'
+        'Requests==0.12.1'
     ],
 
 )
