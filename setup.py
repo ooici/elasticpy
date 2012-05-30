@@ -3,7 +3,7 @@ from distutils.extension import Extension
 
 setup(
     name='elasticpy',
-    version='0.8',
+    version='0.8a',
     description='Python Wrapper for elasticsearch',
     author='Luke Campbell',
     author_email='LCampbell@ASAScience.com',
@@ -19,7 +19,7 @@ setup(
     keywords='elasticsearch search wrapper',
     packages=['elasticpy'],
     install_requires = [
-        'Requests==0.12.1'
+        'Requests>=0.12.1'
     ],
 
 )

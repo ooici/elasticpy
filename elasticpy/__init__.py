@@ -6,5 +6,5 @@ from query import ElasticQuery
 from search import ElasticSearch
 from connection import ElasticConnection
 
-__version__ = '0.8'
+__version__ = '0.8a'
 __author__  = 'Luke Campbell'
