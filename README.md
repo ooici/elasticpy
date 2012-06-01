@@ -1,21 +1,35 @@
 elasticpy
 ===========
-
+"ElasticSearch for the rest of us"
 Python wrapper for the elasticsearch indexing utility. 
 
 Author: Luke Campbell <luke.s.campbell@gmail.com>
+
+About
+-----
+The goal of this module is to provide an intuitive interface between Python APIs and the ElasticSearch API.  Connections are provided through the `requests` library so the connections are inherently thread safe and pooled.  
+
+Writing complex queries in JSON can be tedius and time consuming if you need to constantly reference the Query DSL guide so we've wrapped most of the operations in classes with methods corresponding to the parameters of the operation.  For example:
+
+    sorts = ElasticSort()
+    sorts.sort('name',order='asc')
+    sorts.sort('_score')
+    ----
+    [{"name": {"order": "asc"}}, {"_score": {"order": "asc"}}]
+
+Queries, Filters, Sorts, Maps and Facets are wrapped in convenience classes.  Searching is done through the ElasticSearch class.  
 
 HOWTO
 -----
 
 To begin using elasticpy start by importing.
-    import elasticpy
+    import elasticpy as ep
 
 To interface with the elasticsearch server use the ElasticSearch object.
 
-    search = elasticpy.ElasticSearch()
+    search = ep.ElasticSearch() # Defaults to localhost:9200
 
-To form a query use the ElasticQuery objects.
+To form a query use the ElasticQuery wrapper objects.
 
     query = elasticpy.ElasticQuery().term('users':'luke')
     # and then pass it to the search object
@@ -33,46 +47,68 @@ To form a query use the ElasticQuery objects.
 
 USAGE
 -----
+* Queries - `ElasticQuery`
 
-* Simple Searching, queries ElasticSearch using GET on a url based query.
-    
-        search_simple(index, type, key, search_term)
+    query = ElasticQuery()
 
-* Advanced Searching, queries to ElasticSearch using a GET method and passing a JSON object containing the detailed query parameters, typically assembled by using an ElasticQuery object.
+  * Term Searches 
 
-        search_advanced(index, type, query)
+    query.term(name='luke')
 
-* Searching an index, the entails searching the entire index and all the types within.
+  * Text Searches
 
-        search_index_simple(index, key, search_term)
-        search_index_advanced(index, query)
+    query.text('message', 'this is a test')
 
-* Queries closely match the query types specified by [QueryDSL](http://www.elasticsearch.org/guide/reference/query-dsl/) used in ElasticSearch. They are wrapped in python methods to make them creation of the objects easier to manage than JSON strings.
+  * Text Phrases
 
-        query = elasticpy.ElasticQuery().query_string(query='any')
-        query
-        >  {'query_string': {'allow_leading_wildcard': True,
-          'analyze_wildcard': None,
-          'auto_generate_phase_queries': False,
-          'boost': 1.0,
-          'default_field': '_all',
-          'default_operator': 'OR',
-          'enable_position_increments': True,
-          'fuzzy_min_sim': 0.5,
-          'fuzzy_prefix_length': 0,
-          'lowercase_expanded_terms': True,
-          'phrase_slop': 0,
-          'query': 'any'}}
+    query.text_phrase('message', 'this is a test')
 
-* Filters also closely match the [QueryDSL](http://www.elasticsearch.org/guide/reference/query-dsl/) just like query.
+  * Fuzzy
 
-        filter = elasticpy.ElasticFilter().term('user','luke').range('age',21,26)
-        filter
-        > {'range': {'age': {'from': 18,
-           'include_lower': True,
-           'include_upper': False,
-           'to': 25}},
-         'term': {'user': 'luke'}}
+    query.fuzzy('name','luke',boost=1.0)
+
+  * Fuzzy Like This
+
+    query.fuzzy_like_this('luke',fields='_all')
+
+  * **Match All**
+
+    query.match_all()
+
+  * Wildcard
+
+    query.wildcard('name','lu*')
+
+* Filters - `ElasticFilter`
+
+    filters = ElasticFilter()
+
+  * And
+
+    filters.and_filter(query)
+
+  * Bool
+
+    filters.bool_filter(must=query1, must_not=query2, should=query3)
+
+  * Geo
+
+    * Geo Distance
+
+    filters.geo_distance('location',{'lat':30,'lon':30}, '20km')
+
+    * Geo Bounding Box
+
+    filters.geo_bounding_box('location', {'lat':60, 'lon':60}, {'lat':30, 'lon':30})
+
+  * Match All
+
+    filters.match_all()
+
+  * Range
+
+    filters.numeric_range('price',8.0, 9.9)
+
 
 
 Copying
