@@ -8,15 +8,34 @@
 import requests
 import json
 
+_use_gevent = False
+try:
+    import gevent
+    from gevent.coros import RLock
+    _use_gevent = True
+except ImportError:
+    pass
+
 class ElasticConnection(object):
-    def __init__(self, timeout=None):
+    if _use_gevent:
+        session = None
+        session_lock = RLock()
+
+
+    def __init__(self, timeout=None, **params):
         self.status_code = 0
         self.timeout=timeout
-
+        if _use_gevent:
+            if ElasticConnection.session is None:
+                ElasticConnection.session_lock.acquire()
+                ElasticConnection.session = requests.Session(**params)
+                ElasticConnection.session_lock.release()
+        else:
+            self.session = requests.Session(timeout=timeout, **params) 
     def get(self, url):
         headers = {'Content-Type' : 'Application/json'}
         try:
-            response = requests.get(url,headers=headers,timeout=self.timeout)
+            response = self.session.get(url,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error':e.message}
@@ -26,7 +45,7 @@ class ElasticConnection(object):
         headers = {'Content-Type' : 'Application/json'}
         body = json.dumps(data)
         try:
-            response = requests.post(url,data=body,headers=headers,timeout=self.timeout)
+            response = self.session.post(url,data=body,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}
@@ -37,7 +56,7 @@ class ElasticConnection(object):
         headers = {'Content-Type' : 'Application/json'}
         body = json.dumps(data)
         try:
-            response = requests.post(url,data=body,headers=headers,timeout=self.timeout)
+            response = self.session.post(url,data=body,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}
@@ -47,7 +66,7 @@ class ElasticConnection(object):
     def delete(self,url):
         headers = {'Content-Type' : 'Application/json'}
         try:
-            response = requests.delete(url,headers=headers,timeout=self.timeout)
+            response = self.session.delete(url,headers=headers,timeout=self.timeout)
         except requests.ConnectionError as e:
             self.status_code = 0
             return {'error' : e.message}

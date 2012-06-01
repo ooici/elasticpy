@@ -8,6 +8,7 @@
 
 from connection import ElasticConnection
 
+
 class ElasticSearch(object):
     '''
     ElasticSearch wrapper for python.
@@ -20,6 +21,7 @@ class ElasticSearch(object):
         self.params = None
         self.verbose = verbose
         self.timeout = timeout
+        self.session = ElasticConnection(timeout=timeout)
 
     def timeout(self, value):
         '''
@@ -38,6 +40,9 @@ class ElasticSearch(object):
         '''
         if not self.params:
             self.params={'filter' : efilter}
+            return self
+        if not self.params.has_key('filter'):
+            self.params['filter'] = efilter
             return self
         self.params['filter'].update(efilter)
         return self
@@ -79,9 +84,30 @@ class ElasticSearch(object):
 
         return self
 
+    def sorted(self, fsort):
+        '''
+        Allows to add one or more sort on specific fields. Each sort can be reversed as well. The sort is defined on a per field level, with special field name for _score to sort by score.
+        '''
+        if not self.params:
+            self.params = dict()
+        self.params['sort'] = fsort
+
+        return self
+
     @staticmethod
     def search(index,itype,key,query,host='localhost',port='9200'):
         return ElasticSearch(host=host,port=port).search_simple(index,itype,key,query)
+
+    def search_all(self, query):
+        request = self.session
+        url = 'http://%s:%s/_search' %(self.host, self.port)
+        query_header = {'query':query}
+        if self.params:
+            query_header.update(self.params)
+        if self.verbose:
+            print query_header
+        response = request.post(url,query_header)
+        return response
 
     def search_simple(self, index,itype, key, search_term):
         '''
@@ -90,7 +116,7 @@ class ElasticSearch(object):
         > es = ElasticSearch()
         > es.search_simple('twitter','users','name','kim')
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/%s/_search?q=%s:%s' % (self.host,self.port,index,itype,key,search_term)
         response = request.get(url)
 
@@ -104,7 +130,7 @@ class ElasticSearch(object):
          ... Search results ...
 
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/%s/_search' % (self.host,self.port,index,itype)
         if self.params:
             query_header = dict(query=query, **self.params)
@@ -120,7 +146,7 @@ class ElasticSearch(object):
         '''
         Creates a document
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/%s/' % (self.host, self.port, index, itype)
         if self.verbose:
             print value
@@ -135,7 +161,7 @@ class ElasticSearch(object):
         @param key Search Key
         @param search_term The term to be searched for
         '''
-        request = ElasticConnection()
+        request = self.session
         url = 'http://%s:%s/%s/_search?q=%s:%s' % (self.host,self.port,index,key,search_term)
         response = request.get(url)
         return response
@@ -147,7 +173,7 @@ class ElasticSearch(object):
         > query = ElasticQuery().query_string(query='imchi')
         > search = ElasticSearch()
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/_search' % (self.host, self.port, index)
         if self.params:
             content = dict(query=query, **self.params)
@@ -166,7 +192,7 @@ class ElasticSearch(object):
         > search.index_create('twitter')
           {"ok":true,"acknowledged":true}
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         content = {'settings' : dict(number_of_shards=number_of_shards, number_of_replicas=number_of_replicas)}
         if self.verbose:
             print content
@@ -181,7 +207,7 @@ class ElasticSearch(object):
         > search.index_delete('twitter')
           {"ok" : True, "acknowledged" : True }
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s' % (self.host, self.port, index)
         response = request.delete(url)
         return response
@@ -193,7 +219,7 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_open('my_index')
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/_open' % (self.host, self.port, index)
         response = request.post(url,None)
         return response
@@ -205,7 +231,7 @@ class ElasticSearch(object):
 
         > ElasticSearch().index_close('my_index')
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/_close' % (self.host, self.port, index)
         response = request.post(url,None)
         return response
@@ -224,7 +250,7 @@ class ElasticSearch(object):
          u'_version': 1,
          u'ok': True}
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         if not index_type:
             index_type = index_name
         if not couchdb_db:
@@ -260,7 +286,7 @@ class ElasticSearch(object):
         Delete's a river for the specified index
         WARNING: It DOES NOT delete the index, only the river, so the only effects of this are that the index will no longer poll CouchDB for updates.
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/_river/%s' % (self.host, self.port, index_name)
         response = request.delete(url)
         return response
@@ -278,7 +304,7 @@ class ElasticSearch(object):
         '''
         Lists indices
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/_cluster/state/' % (self.host, self.port)
         response = request.get(url)
         if request.status_code==200:
@@ -290,7 +316,7 @@ class ElasticSearch(object):
         '''
         Enable a specific map for an index and type
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/%s/_mapping' % (self.host, self.port, index_name, index_type)
         content = { index_type : { 'properties' : map_value } }
         if self.verbose:
@@ -309,7 +335,7 @@ class ElasticSearch(object):
         '''
         List the types available in an index
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s/_mapping' % (self.host, self.port, index_name)
         response = request.get(url)
         if request.status_code == 200:
@@ -325,7 +351,7 @@ class ElasticSearch(object):
         '''
         Submits or requsts raw input
         '''
-        request = ElasticConnection(timeout=self.timeout)
+        request = self.session
         url = 'http://%s:%s/%s' % (self.host, self.port, module)
         if self.verbose:
             print data

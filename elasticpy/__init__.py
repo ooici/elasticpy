@@ -5,6 +5,7 @@ from filter import ElasticFilter
 from query import ElasticQuery
 from search import ElasticSearch
 from connection import ElasticConnection
+from sort import ElasticSort
 
-__version__ = '0.8a'
+__version__ = '0.9'
 __author__  = 'Luke Campbell'

@@ -28,7 +28,7 @@ class ElasticQuery(dict):
             self['term'] = dict(**kwargs)
 
         return self
-    def text(self, field, query, operator):
+    def text(self, field, query, operator='or'):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/text-query.html
 
@@ -42,8 +42,11 @@ class ElasticQuery(dict):
           }
         Note: field represents the name of the field, you can use _all instead.
         '''
-        self['text'] = {field : query}
-        if operator and (operator=='and' or operator=='or'): self['text']['operator'] = operator
+        self['text'] = { field : { 'query' : query, 'operator' : operator }}
+        return self
+
+    def text_phrase(self, field, query):
+        self['text_phrase'] = {field : query}
         return self
 
     def bool(self,must=None, should=None, must_not=None,minimum_number_should_match=-1, boost=-1):
