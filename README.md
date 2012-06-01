@@ -49,65 +49,65 @@ USAGE
 -----
 * Queries - `ElasticQuery`
 
-    query = ElasticQuery()
+        query = ElasticQuery()
 
   * Term Searches 
 
-    query.term(name='luke')
+            query.term(name='luke')
 
   * Text Searches
 
-    query.text('message', 'this is a test')
+            query.text('message', 'this is a test')
 
   * Text Phrases
 
-    query.text_phrase('message', 'this is a test')
+            query.text_phrase('message', 'this is a test')
 
   * Fuzzy
 
-    query.fuzzy('name','luke',boost=1.0)
+            query.fuzzy('name','luke',boost=1.0)
 
   * Fuzzy Like This
 
-    query.fuzzy_like_this('luke',fields='_all')
+            query.fuzzy_like_this('luke',fields='_all')
 
   * **Match All**
 
-    query.match_all()
+            query.match_all()
 
   * Wildcard
 
-    query.wildcard('name','lu*')
+            query.wildcard('name','lu*')
 
 * Filters - `ElasticFilter`
 
-    filters = ElasticFilter()
+        filters = ElasticFilter()
 
   * And
 
-    filters.and_filter(query)
+            filters.and_filter(query)
 
   * Bool
 
-    filters.bool_filter(must=query1, must_not=query2, should=query3)
+            filters.bool_filter(must=query1, must_not=query2, should=query3)
 
   * Geo
 
-    * Geo Distance
+     * Geo Distance
 
-    filters.geo_distance('location',{'lat':30,'lon':30}, '20km')
+                filters.geo_distance('location',{'lat':30,'lon':30}, '20km')
 
-    * Geo Bounding Box
+     * Geo Bounding Box
 
-    filters.geo_bounding_box('location', {'lat':60, 'lon':60}, {'lat':30, 'lon':30})
+                filters.geo_bounding_box('location', {'lat':60, 'lon':60}, {'lat':30, 'lon':30})
 
   * Match All
 
-    filters.match_all()
+            filters.match_all()
 
   * Range
 
-    filters.numeric_range('price',8.0, 9.9)
+            filters.numeric_range('price',8.0, 9.9)
 
 
 
