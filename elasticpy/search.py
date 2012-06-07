@@ -15,13 +15,13 @@ class ElasticSearch(object):
     Uses simple HTTP queries (RESTful) with json to provide the interface.
     '''
 
-    def __init__(self, host='localhost',port='9200',timeout=None,verbose=False):
+    def __init__(self, host='localhost',port='9200',timeout=None,verbose=False, encoding=None):
         self.host = host
         self.port = port
         self.params = None
         self.verbose = verbose
         self.timeout = timeout
-        self.session = ElasticConnection(timeout=timeout)
+        self.session = ElasticConnection(timeout=timeout,encoding=encoding)
 
     def timeout(self, value):
         '''

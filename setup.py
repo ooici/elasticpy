@@ -19,7 +19,8 @@ setup(
     keywords='elasticsearch search wrapper',
     packages=['elasticpy'],
     install_requires = [
-        'Requests>=0.12.1'
+        'Requests>=0.12.1',
+        'simplejson'
     ],
 
 )
