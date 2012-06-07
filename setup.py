@@ -20,7 +20,7 @@ setup(
     packages=['elasticpy'],
     install_requires = [
         'Requests>=0.12.1',
-        'simplejson'
+        'simplejson==2.1.6'
     ],
 
 )
