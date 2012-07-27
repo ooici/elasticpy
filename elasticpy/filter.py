@@ -43,7 +43,8 @@ class ElasticFilter(dict):
           {'exists' : {'field' : 'user' } }
         '''
         if field:
-            self['field'] = field
+
+            self['exists'] = {'field':field}
 
         return self
     def ids(self, values=[], itype=''):

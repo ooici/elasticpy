@@ -246,8 +246,8 @@ class ElasticQuery(dict):
 
     def range(self,
               field,
-              from_value,
-              to_value,
+              from_value=None,
+              to_value=None,
               include_lower=True,
               include_upper=True,
               boost=1.0):
@@ -257,9 +257,21 @@ class ElasticQuery(dict):
 
         > query = ElasticQuery().range('age', from_value=10, to_value=20, boost=2.0)
         '''
+        if field is None:
+            return
+        self['range'] = {}
+        self['range'][field] = {}
+        if from_value is not None:
+            self['range'][field].update({'from':from_value})
+        if to_value is not None:
+            self['range'][field].update({'to':to_value})
+        if include_upper is not None:
+            self['range'][field].update(include_upper=include_upper)
+        if include_lower is not None:
+            self['range'][field].update(include_lower=include_lower)
+        if boost is not None:
+            self['range'][field].update(boost=boost)
 
-        if field is None or from_value is None or to_value is None: return
-        self['range'] = {field : { 'from' : from_value, 'to' : to_value, 'include_lower' : include_lower, 'include_upper' : include_upper, 'boost' : boost}}
         return self
 
     def wildcard(self, field, value):
