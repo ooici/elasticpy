@@ -3,7 +3,7 @@ from distutils.extension import Extension
 
 setup(
     name='elasticpy',
-    version='0.10',
+    version='0.11',
     description='Python Wrapper for elasticsearch',
     author='Luke Campbell',
     author_email='LCampbell@ASAScience.com',

@@ -7,5 +7,5 @@ from search import ElasticSearch
 from connection import ElasticConnection
 from sort import ElasticSort
 
-__version__ = '0.10'
+__version__ = '0.11'
 __author__  = 'Luke Campbell'

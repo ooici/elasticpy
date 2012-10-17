@@ -12,7 +12,8 @@ class ElasticQuery(dict):
     Wrapper for ElasticSearch queries.
     '''
 
-    def term(self,**kwargs):
+    @classmethod
+    def term(cls,**kwargs):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/term-query.html
         Matches documents that have fields that contain a term (not analyzed). The term query maps to Lucene TermQuery
@@ -22,34 +23,79 @@ class ElasticQuery(dict):
           {'term' : {'user':'kimchy'}}
 
         '''
-        if len(kwargs) > 1:
-            self['terms'] = dict(**kwargs)
-        else:
-            self['term'] = dict(**kwargs)
+        return cls(term=dict(**kwargs))
 
-        return self
-    def text(self, field, query, operator='or'):
+    @classmethod
+    def terms(cls, tags, minimum_match=None):
         '''
-        http://www.elasticsearch.org/guide/reference/query-dsl/text-query.html
+        A query that match on any (configurable) of the provided terms. This is a simpler syntax query for using a bool query with several term queries in the should clauses. For example:
 
-        A family of text queries that accept text, analyzes it, and constructs a query out of it.
-        > eq = ElasticQuery().text('message','this is a test')
-        > eq
-          {
-            'text' : {
-              'message' : 'this is a test'
-             }
-          }
-        Note: field represents the name of the field, you can use _all instead.
+        {
+            "terms" : {
+                "tags" : [ "blue", "pill" ],
+                "minimum_match" : 1
+            }
+        }'''
+        instance = cls(terms={'tags':tags})
+        if minimum_match is not None: instance['terms']['minimum_match'] = minimum_match
+        return instance
+
+   
+    @classmethod
+    def field(cls, field, query, boost=None, enable_position_increments=None):
         '''
-        self['text'] = { field : { 'query' : query, 'operator' : operator }}
-        return self
+        A query that executes a query string against a specific field. It is a simplified version of query_string query (by setting the default_field to the field this query executed against). In its simplest form:
 
-    def text_phrase(self, field, query):
-        self['text_phrase'] = {field : query}
-        return self
+        {
+            "field" : { 
+                "name.first" : "+something -else"
+            }
+        }
+        Most of the query_string parameters are allowed with the field query as well, in such a case, the query should be formatted as follows:
 
-    def bool(self,must=None, should=None, must_not=None,minimum_number_should_match=-1, boost=-1):
+        {
+            "field" : { 
+                "name.first" : {
+                    "query" : "+something -else",
+                    "boost" : 2.0,
+                    "enable_position_increments": false
+                }
+            }
+        }
+        '''
+        instance = cls(field={field:{'query':query}})
+        if boost is not None: instance['field']['boost'] = boost
+        if enable_position_increments is not None: instance['field']['enable_position_increments'] = enable_position_increments
+        return instance
+
+    @classmethod
+    def text(cls, field, query, operator='or'):
+        '''
+        text query has been deprecated (effectively renamed) to match query since 0.19.9, please use it. text is still supported.
+        '''
+
+        raise NotImplementedError('Deprecated')
+
+    @classmethod
+    def match(cls,field, query, operator=None):
+        '''
+        A family of match queries that accept text/numerics/dates, analyzes it, and constructs a query out of it. For example:
+
+        {
+            "match" : {
+                "message" : "this is a test"
+            }
+        }
+        Note, message is the name of a field, you can subsitute the name of any field (including _all) instead.
+        '''
+        instance = cls(match={field:{'query':query}})
+        if operator is not None: instance['match'][field]['operator'] = operator
+
+
+        return instance
+    
+    @classmethod
+    def bool(cls, must=None, should=None, must_not=None, minimum_number_should_match=None, boost=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/bool-query.html
         A query that matches documents matching boolean combinations of other queris. The bool query maps to Lucene BooleanQuery. It is built using one of more boolean clauses, each clause with a typed occurrence. The occurrence types are:
@@ -68,20 +114,17 @@ class ElasticQuery(dict):
 
 
         '''
-        self['bool'] = dict()
-        if must and isinstance(must,ElasticQuery):
-            self['bool']['must'] = must.query()
-        if should and isinstance(should,ElasticQuery):
-            self['bool']['should'] = should.query()
-        if must_not and isinstance(must_not,ElasticQuery):
-            self['bool']['must_not'] = must_not.query()
-        if minimum_number_should_match > 0:
-            self['bool']['minimum_number_should_match'] = minimum_number_should_match
-        if boost > 0:
-            self['bool']['boost'] = boost
+        instance = cls(bool={})
+        if must is not None: instance['bool']['must']=must
+        if should is not None: instance['bool']['should']=should
+        if must_not is not None: instance['bool']['must_not']=must_not
+        if minimum_number_should_match is not None: instance['bool']['minimum_number_should_match']=minimum_number_should_match
+        if boost is not None: instance['bool']['boost']=boost
 
-        return self
-    def ids(self, values=None, itype=''):
+        return instance
+
+    @classmethod
+    def ids(cls, values=None, itype=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/ids-query.html
         Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
@@ -94,25 +137,25 @@ class ElasticQuery(dict):
             }
           }
         '''
-        if not values: return
+        instance = cls(ids={})
+        if values is not None: instance['ids']['values']=values
+        if itype is not None: instance['ids']['type']=itype
+        return instance
 
-        self['ids'] = dict(values=values)
-
-        if itype:
-            self['ids']['type'] = itype
-
-        return self
-
-    def fuzzy(self, field, value, boost=1.0, min_similarity=0.5, prefix_length=0):
+    @classmethod
+    def fuzzy(cls, field, value, boost=None, min_similarity=None, prefix_length=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/fuzzy-query.html
         A fuzzy based query that uses similarity based on Levenshtein (edit distance) algorithm.
         '''
-        if not (field and value): return
-        self['fuzzy'] = { field : dict(value=value, boost=boost, min_similarity=min_similarity, prefix_length=prefix_length)}
-        return self
+        instance = cls(fuzzy={field:{'value':value}})
+        if boost is not None: instance['fuzzy'][field]['boost'] = boost
+        if min_similarity is not None: instance['fuzzy'][field]['min_similarity'] = min_similarity
+        if prefix_length is not None: instance['fuzzy'][field]['prefix_length'] = prefix_length
+        return instance
 
-    def fuzzy_like_this(self, like_text, fields='_all', ignore_tf=False, max_query_terms=25, min_similarity=0.5, prefix_length=0, boost=1.0, analyzer=None):
+    @classmethod
+    def fuzzy_like_this(cls, like_text, fields=None, ignore_tf=None, max_query_terms=None, min_similarity=None, prefix_length=None, boost=None, analyzer=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/flt-query.html
         Fuzzy like this query find documents that are "like" provided text by running it against one or more fields.
@@ -128,14 +171,19 @@ class ElasticQuery(dict):
               'prefix_length': 0}}
 
         '''
-        self['fuzze_like_this'] = dict(fields=fields, like_text=like_text, ifgnore_tf=ignore_tf, max_query_terms=max_query_terms, min_similarity=min_similarity, prefix_length=prefix_length, boost=boost)
-        if analyzer:
-            self['fuzzy_like_this']['analyzer'] = analyzer
+        instance = cls(fuzzy_like_this={'like_text':like_text})
+        if fields is not None: instance['fuzzy_like_this']['fields'] = fields
+        if ignore_tf is not None: instance['fuzzy_like_this']['ignore_tf'] = ignore_tf
+        if max_query_terms is not None: instance['fuzzy_like_this']['max_query_terms'] = max_query_terms
+        if min_similarity is not None: instance['fuzzy_like_this']['min_similarity'] = min_similarity
+        if prefix_length is not None: instance['fuzzy_like_this']['prefix_length'] = prefix_length
+        if boost is not None: instance['fuzzy_like_this']['boost'] = boost
+        if analyzer is not None: instance['fuzzy_like_this']['analyzer'] = analyzer
 
-        return self
+        return instance
 
-
-    def has_child(self, child_type, query):
+    @classmethod
+    def has_child(cls, child_type, query):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/has-child-query.html
         The has_child query accepts a query and the child type to run against, and results in parent documents that have child docs matching the query.
@@ -144,77 +192,66 @@ class ElasticQuery(dict):
         > query = ElasticQuery().has_Child('blog_tag', child_query)
         '''
 
-        if not (child_type and query): return
+        instance = cls(has_child={'type':child_type, 'query':query})
+        return instance
 
-        self['has_child'] = dict(query=query)
-        self['has_child']['type'] = child_type
-        return self
-
-    def match_all(self):
+    @classmethod
+    def match_all(cls):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/match-all-query.html
         A query that matches all documents. Maps to Lucene MatchAllDocsQuery
         '''
 
-        self['match_all'] = dict()
-        return self
-
-    def mlt(self, like_text, fields='_all',percent_terms_to_match=0.3, min_term_freq=2, max_query_terms=25, stop_words=[], min_doc_freq=5, max_doc_freq=0, min_word_len=0, max_word_len=0, boost_terms=1, boost=1, analyzer=None):
+        return cls(match_all={})
+    
+    @classmethod
+    def mlt(cls, like_text, fields=None,percent_terms_to_match=None, min_term_freq=None, max_query_terms=None, stop_words=None, min_doc_freq=None, max_doc_freq=None, min_word_len=None, max_word_len=None, boost_terms=None, boost=None, analyzer=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/mlt-query.html
         More like this query find documents that are "like" provided text by running it against one or more fields.
         > query = ElasticQuery().mlt('text like this one', fields=['post.content'])
         '''
 
-        if not like_text: return
+        instance = cls(more_like_this={'like_text':like_text})
+        if fields is not None: instance['more_like_this']['fields'] = fields
+        if percent_terms_to_match is not None: instance['more_like_this']['percent_terms_to_match'] = percent_terms_to_match
+        if min_term_freq is not None: instance['more_like_this']['min_term_freq'] = min_term_freq
+        if max_query_terms is not None: instance['more_like_this']['max_query_terms'] = max_query_terms
+        if stop_words is not None: instance['more_like_this']['stop_words'] = stop_words
+        if min_doc_freq is not None: instance['more_like_this']['min_doc_freq'] = min_doc_freq
+        if max_doc_freq is not None: instance['more_like_this']['max_doc_freq'] = max_doc_freq
+        if min_word_len is not None: instance['more_like_this']['min_word_len'] = min_word_len
+        if max_word_len is not None: instance['more_like_this']['max_word_len'] = max_word_len
+        if boost_terms is not None: instance['more_like_this']['boost_terms'] = boost_terms
+        if boost is not None: instance['more_like_this']['boost'] = boost
+        if analyzer is not None: instance['more_like_this']['analyzer'] = analyzer
+        return instance
 
-        self['more_like_this'] = dict(
-            like_text=like_text,
-            fields=fields,
-            percent_terms_to_match=percent_terms_to_match,
-            min_term_freq=min_term_freq,
-            max_query_terms=max_query_terms,
-            min_doc_freq=min_doc_freq,
-            max_doc_freq=max_doc_freq,
-            min_word_len=min_word_len,
-            max_word_len=max_word_len,
-            boost_terms=boost_terms,
-            boost=boost
-        )
-        if analyzer:
-            self['more_like_this']['analyzer'] = analyzer
-
-        if stop_words:
-            self['more_like_this']['stop_words'] = stop_words
-
-        return self
-
-    def prefix(self, field, value):
+    @classmethod
+    def prefix(cls, **kwargs):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/prefix-query.html
         Matches documents that have fields containing terms with a specified prefix (not analyzed). The prefix query maps to Lucene PrefixQuery.
         Example, the following finds a document where the user field contains a temr that starts with lu
         > query = ElasticQuery().prefix('user', 'lu')
         '''
-        if not (field and value): return
-
-        self['prefix'] = {field : value}
-        return self
-
-    def query_string(self,
+        return cls(prefix=dict(**kwargs))
+    
+    @classmethod
+    def query_string(cls,
                      query,
-                     default_field='_all',
-                     default_operator='OR',
+                     default_field=None,
+                     default_operator=None,
                      analyzer=None,
-                     allow_leading_wildcard=True,
-                     lowercase_expanded_terms=True,
-                     enable_position_increments=True,
-                     fuzzy_prefix_length=0,
-                     fuzzy_min_sim=0.5,
-                     phrase_slop=0,
-                     boost=1.0,
+                     allow_leading_wildcard=None,
+                     lowercase_expanded_terms=None,
+                     enable_position_increments=None,
+                     fuzzy_prefix_length=None,
+                     fuzzy_min_sim=None,
+                     phrase_slop=None,
+                     boost=None,
                      analyze_wildcard=None,
-                     auto_generate_phase_queries=False,
+                     auto_generate_phrase_queries=None,
                      minimum_should_match=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/query-string-query.html
@@ -222,68 +259,52 @@ class ElasticQuery(dict):
 
         > query = ElasticQuery().query_string('this AND that OR thus', default_field='content')
         '''
-        if not query: return
-        self['query_string'] = dict(
-            query=query,
-            default_field=default_field,
-            default_operator=default_operator,
-            allow_leading_wildcard=allow_leading_wildcard,
-            lowercase_expanded_terms=lowercase_expanded_terms,
-            enable_position_increments=enable_position_increments,
-            fuzzy_prefix_length=fuzzy_prefix_length,
-            fuzzy_min_sim=fuzzy_min_sim,
-            phrase_slop=phrase_slop,
-            boost=boost,
-            analyze_wildcard=analyze_wildcard,
-            auto_generate_phase_queries=auto_generate_phase_queries,
-        )
-        if analyzer:
-            self['query_strict']['analyzer'] = analyzer
-            if analyze_wildcard:
-                self['query_strict']['analyze_wildcard'] = analyze_wildcard
+        instance = cls(query_string={'query':query})
+        if default_field is not None: instance['query_string']['default_field'] = default_field
+        if default_operator is not None: instance['query_string']['default_operator'] = default_operator
+        if analyzer is not None: instance['query_string']['analyzer'] = analyzer
+        if allow_leading_wildcard is not None: instance['query_string']['allow_leading_wildcard'] = allow_leading_wildcard
+        if lowercase_expanded_terms is not None: instance['query_string']['lowercase_expanded_terms'] = lowercase_expanded_terms
+        if enable_position_increments is not None: instance['query_string']['enable_position_increments'] = enable_position_increments
+        if fuzzy_prefix_length is not None: instance['query_string']['fuzzy_prefix_length'] = fuzzy_prefix_length
+        if fuzzy_min_sim is not None: instance['query_string']['fuzzy_min_sim'] = fuzzy_min_sim
+        if phrase_slop is not None: instance['query_string']['phrase_slop'] = phrase_slop
+        if boost is not None: instance['query_string']['boost'] = boost
+        if analyze_wildcard is not None: instance['query_string']['analyze_wildcard'] = analyze_wildcard
+        if auto_generate_phrase_queries is not None: instance['query_string']['auto_generate_phrase_queries'] = auto_generate_phrase_queries
+        if minimum_should_match is not None: instance['query_string']['minimum_should_match'] = minimum_should_match
+        return instance
 
-        return self
-
-    def range(self,
+    @classmethod
+    def range(cls,
               field,
               from_value=None,
               to_value=None,
-              include_lower=True,
-              include_upper=True,
-              boost=1.0):
+              include_lower=None,
+              include_upper=None,
+              boost=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/range-query.html
         Matches documents with fields that have terms within a certain range. The type of the Lucene query depends on the field type, for string fields, the TermRangeQuery, while for number/date fields, the query is a NumericRangeQuery. The following example returns all documents where age is between 10 and 20:
 
         > query = ElasticQuery().range('age', from_value=10, to_value=20, boost=2.0)
         '''
-        if field is None:
-            return
-        self['range'] = {}
-        self['range'][field] = {}
-        if from_value is not None:
-            self['range'][field].update({'from':from_value})
-        if to_value is not None:
-            self['range'][field].update({'to':to_value})
-        if include_upper is not None:
-            self['range'][field].update(include_upper=include_upper)
-        if include_lower is not None:
-            self['range'][field].update(include_lower=include_lower)
-        if boost is not None:
-            self['range'][field].update(boost=boost)
+        instance = cls(range={field:{}})
+        if from_value is not None: instance['range'][field]['from'] = from_value
+        if to_value is not None: instance['range'][field]['to'] = to_value
+        if include_lower is not None: instance['range'][field]['include_lower'] = include_lower
+        if include_upper is not None: instance['range'][field]['include_upper'] = include_upper
+        if boost is not None: instance['range'][field]['boost'] = boost
+        return instance
 
-        return self
-
-    def wildcard(self, field, value):
+    @classmethod
+    def wildcard(cls, field, value):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/wildcard-query.html
         Matches documents that have fields matching a wildcard expression (not analyzed). Supported wildcards are *, which matches any character sequence (including the empty one), and ?, which matches any single character. Note this query can be slow, as it needs to iterate over many terms. In order to prevent extremely slow wildcard queries, a wildcard term should not start with one of the wildcards * or ?. The wildcard query maps to Lucene WildcardQuery.
 
         > query = ElasticQuery.wildcard('user', 'ki*y')
         '''
-        if not (field and value): return
-
-        self['wildcard'] = {field : value}
-        return self
+        return cls(wildcard={field:value})
 
 
