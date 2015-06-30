@@ -8,16 +8,18 @@
 
 
 class ElasticMap(dict):
+
     '''
     Mapping is the process of defining how a document should be mapped to the Search Engine, including its searchable characteristics such as which fields are searchable and if/how they are tokenized. In ElasticSearch, an index may store documents of different "mapping types". ElasticSearch allows one to associate multiple mapping definitions for each mapping type.
 
 Explicit mapping is defined on an index/type level. By default, there isn't a need to define an explicit mapping, since one is automatically created and registered when a new type or new field is introduced (with no performance overhead) and have sensible defaults. Only when the defaults need to be overridden must a mapping definition be provided.
     '''
+
     def __init__(self, field):
         self.field = field
         self[self.field] = dict()
 
-    def type(self,type_name):
+    def type(self, type_name):
         '''
         Assigns a particular type to a field in the mapped properties.
         Available types are: string, integer/long, float/double, boolean and null
@@ -25,7 +27,7 @@ Explicit mapping is defined on an index/type level. By default, there isn't a ne
         self[self.field]['type'] = type_name
         return self
 
-    def analyzed(self,should=True):
+    def analyzed(self, should=True):
         '''
         Specifies to the map that the field should be analyzed when indexed.
         '''
@@ -36,10 +38,10 @@ Explicit mapping is defined on an index/type level. By default, there isn't a ne
         '''
         Specifies that the field should be ignored in the index
         '''
-        self[self.field] = {'index' : 'no'}
+        self[self.field] = {'index': 'no'}
         return self
 
-    def null_value(self,value):
+    def null_value(self, value):
         '''
         Specifies the null value to use when indexing.
         '''
@@ -99,4 +101,3 @@ Explicit mapping is defined on an index/type level. By default, there isn't a ne
         '''
         self[self.field]['include_in_all'] = should
         return self
-

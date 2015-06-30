@@ -7,29 +7,29 @@
 '''
 
 
-
 class ElasticFilter(dict):
+
     '''
     Wrapper for ElasticSearch filters
     '''
-    
+
     @classmethod
     def and_filter(cls, query):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/and-filter.html
         A filter that matches documents using AND boolean operator on other queries. This filter is more performant then bool filter. Can be placed within queries that accept a filter.
         '''
-        return cls({'and':query})
+        return cls({'and': query})
 
     @classmethod
-    def bool_filter(cls,query):
+    def bool_filter(cls, query):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/bool-filter.html
         A filter that matches documents matching boolean combinations of other queries. Similar in concept to Boolean query, except that the clauses are other filters. Can be placed within queries that accept a filter.
         '''
 
-        return cls({'bool':query})
-    
+        return cls({'bool': query})
+
     @classmethod
     def exists(cls, field):
         '''
@@ -39,8 +39,8 @@ class ElasticFilter(dict):
         > filter.query()
           {'exists' : {'field' : 'user' } }
         '''
-        return cls(exists={'field':field})
-    
+        return cls(exists={'field': field})
+
     @classmethod
     def ids(cls, values, itype=None):
         '''
@@ -48,8 +48,9 @@ class ElasticFilter(dict):
 Filters documents that only have the provided ids. Note, this filter does not require the _id field to be indexed since it works using the _uid field.
 
         '''
-        instance = cls(ids={'values':values})
-        if itype is not None: instance['ids']['type'] = itype
+        instance = cls(ids={'values': values})
+        if itype is not None:
+            instance['ids']['type'] = itype
 
         return instance
 
@@ -59,16 +60,16 @@ Filters documents that only have the provided ids. Note, this filter does not re
         http://www.elasticsearch.org/guide/reference/query-dsl/limit-filter.html
         A limit filter limits the number of documents (per shard) to execute on.
         '''
-        return cls(limit={'value':value})
+        return cls(limit={'value': value})
 
     @classmethod
-    def type(cls,value):
+    def type(cls, value):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/type-filter.html
 Filters documents matching the provided document / mapping type. Note, this filter can work even when the _type field is not indexed (using the _uid field).
         '''
-        return cls(type={'value':value})
-    
+        return cls(type={'value': value})
+
     @classmethod
     def geo_bounding_box(cls, field, top_left, bottom_right):
         '''
@@ -81,7 +82,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         > bounds = ElasticFilter().geo_bounding_box('pin.location', "drm3btev3e86", "drm3btev3e86")
 
         '''
-        return cls(geo_bounding_box={field:{'top_left':top_left, 'bottom_right':bottom_right}})
+        return cls(geo_bounding_box={field: {'top_left': top_left, 'bottom_right': bottom_right}})
 
     @classmethod
     def geo_distance(cls, field, center, distance, distance_type=None):
@@ -95,10 +96,10 @@ Filters documents matching the provided document / mapping type. Note, this filt
         > bounds = ElasticFilter().geo_distance('pin.location', [40.73, -74.1], '300km')
         '''
 
-        instance = cls(geo_distance={'distance':distance, field:center})
-        if distance_type is not None: instance['geo_distance']['distance_type'] = distance_type
+        instance = cls(geo_distance={'distance': distance, field: center})
+        if distance_type is not None:
+            instance['geo_distance']['distance_type'] = distance_type
         return instance
-
 
     @classmethod
     def geo_distance_range(cls, field, center, from_distance, to_distance, distance_type=None):
@@ -108,8 +109,9 @@ Filters documents matching the provided document / mapping type. Note, this filt
 
 
         '''
-        instance = cls(geo_distance_range={'from':from_distance, 'to':to_distance, field:center})
-        if distance_type is not None: instance['geo_distance_range']['distance_type'] = distance_type
+        instance = cls(geo_distance_range={'from': from_distance, 'to': to_distance, field: center})
+        if distance_type is not None:
+            instance['geo_distance_range']['distance_type'] = distance_type
         return instance
 
     @classmethod
@@ -121,7 +123,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
 
         > filter = ElasticFilter().geo_polygon('pin.location', [[40, -70], [30, -80], [20, -90]])
         '''
-        return cls(geo_polygon={field:{'points':points}})
+        return cls(geo_polygon={field: {'points': points}})
 
     @classmethod
     def has_child(cls, child_type, query):
@@ -134,8 +136,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
 
         '''
 
-        return cls(has_child={'type':child_type, 'query':query})
-
+        return cls(has_child={'type': child_type, 'query': query})
 
     @classmethod
     def match_all(cls):
@@ -154,7 +155,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents where a specific field has no value in them.
 
         '''
-        return cls(missing={'field':field})
+        return cls(missing={'field': field})
 
     @classmethod
     def not_filter(cls, query):
@@ -163,7 +164,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         A filter that filters out matched documents using a query. This filter is more performant then bool filter. Can be placed within queries that accept a filter.
 
         '''
-        return cls({'not':query})
+        return cls({'not': query})
 
     @classmethod
     def numeric_range(cls, field, from_value, to_value, include_lower=None, include_upper=None):
@@ -171,11 +172,13 @@ Filters documents matching the provided document / mapping type. Note, this filt
         http://www.elasticsearch.org/guide/reference/query-dsl/numeric-range-filter.html
         Filters documents with fields that have values within a certain numeric range. Similar to range filter, except that it works only with numeric values, and the filter execution works differently.
         '''
-        instance = cls(numeric_range={field:{'from':from_value, 'to':to_value}})
-        if include_lower is not None: instance['numeric_range'][field]['include_lower'] = include_lower
-        if include_upper is not None: instance['numeric_range'][field]['include_upper'] = include_upper
+        instance = cls(numeric_range={field: {'from': from_value, 'to': to_value}})
+        if include_lower is not None:
+            instance['numeric_range'][field]['include_lower'] = include_lower
+        if include_upper is not None:
+            instance['numeric_range'][field]['include_upper'] = include_upper
         return instance
-    
+
     @classmethod
     def or_filter(cls, query):
         '''
@@ -188,7 +191,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         > filter = ElasticFilter().or_filter([term1, term2])
         '''
 
-        return cls({'or':query})
+        return cls({'or': query})
 
     @classmethod
     def prefix(cls, field, pre):
@@ -197,8 +200,8 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents that have fields containing terms with a specified prefix (not analyzed). Similar to phrase query, except that it acts as a filter. Can be placed within queries that accept a filter.
         '''
 
-        return cls(prefix={field:pre})
-    
+        return cls(prefix={field: pre})
+
     @classmethod
     def query(cls, query):
         '''
@@ -206,7 +209,7 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Wraps any query to be used as a filter. Can be placed within queries that accept a filter.
         '''
         return cls(query=query)
-    
+
     @classmethod
     def range(cls, field, from_value=None, to_value=None, include_lower=None, include_upper=None):
         '''
@@ -215,11 +218,15 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents with fields that have terms within a certain range. Similar to range query, except that it acts as a filter. Can be placed within queries that accept a filter.
         '''
 
-        instance = cls({'range':{field:{}}})
-        if from_value is not None: instance['range'][field]['from'] = from_value
-        if to_value is not None: instance['range'][field]['to'] = to_value
-        if include_lower is not None: instance['range'][field]['include_lower'] = include_lower
-        if include_upper is not None: instance['range'][field]['include_upper'] = include_upper
+        instance = cls({'range': {field: {}}})
+        if from_value is not None:
+            instance['range'][field]['from'] = from_value
+        if to_value is not None:
+            instance['range'][field]['to'] = to_value
+        if include_lower is not None:
+            instance['range'][field]['include_lower'] = include_lower
+        if include_upper is not None:
+            instance['range'][field]['include_upper'] = include_upper
 
         return instance
 
@@ -241,5 +248,4 @@ Filters documents matching the provided document / mapping type. Note, this filt
         Filters documents that have fields that contain a term (not analyzed). Similar to term query, except that it acts as a filter.
         '''
 
-        return cls(term={field:value})
-
+        return cls(term={field: value})
