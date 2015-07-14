@@ -8,12 +8,13 @@
 
 
 class ElasticQuery(dict):
+
     '''
     Wrapper for ElasticSearch queries.
     '''
 
     @classmethod
-    def term(cls,**kwargs):
+    def term(cls, **kwargs):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/term-query.html
         Matches documents that have fields that contain a term (not analyzed). The term query maps to Lucene TermQuery
@@ -36,25 +37,25 @@ class ElasticQuery(dict):
                 "minimum_match" : 1
             }
         }'''
-        instance = cls(terms={'tags':tags})
-        if minimum_match is not None: instance['terms']['minimum_match'] = minimum_match
+        instance = cls(terms={'tags': tags})
+        if minimum_match is not None:
+            instance['terms']['minimum_match'] = minimum_match
         return instance
 
-   
     @classmethod
     def field(cls, field, query, boost=None, enable_position_increments=None):
         '''
         A query that executes a query string against a specific field. It is a simplified version of query_string query (by setting the default_field to the field this query executed against). In its simplest form:
 
         {
-            "field" : { 
+            "field" : {
                 "name.first" : "+something -else"
             }
         }
         Most of the query_string parameters are allowed with the field query as well, in such a case, the query should be formatted as follows:
 
         {
-            "field" : { 
+            "field" : {
                 "name.first" : {
                     "query" : "+something -else",
                     "boost" : 2.0,
@@ -63,9 +64,11 @@ class ElasticQuery(dict):
             }
         }
         '''
-        instance = cls(field={field:{'query':query}})
-        if boost is not None: instance['field']['boost'] = boost
-        if enable_position_increments is not None: instance['field']['enable_position_increments'] = enable_position_increments
+        instance = cls(field={field: {'query': query}})
+        if boost is not None:
+            instance['field']['boost'] = boost
+        if enable_position_increments is not None:
+            instance['field']['enable_position_increments'] = enable_position_increments
         return instance
 
     @classmethod
@@ -77,7 +80,7 @@ class ElasticQuery(dict):
         raise NotImplementedError('Deprecated')
 
     @classmethod
-    def match(cls,field, query, operator=None):
+    def match(cls, field, query, operator=None):
         '''
         A family of match queries that accept text/numerics/dates, analyzes it, and constructs a query out of it. For example:
 
@@ -88,12 +91,12 @@ class ElasticQuery(dict):
         }
         Note, message is the name of a field, you can subsitute the name of any field (including _all) instead.
         '''
-        instance = cls(match={field:{'query':query}})
-        if operator is not None: instance['match'][field]['operator'] = operator
-
+        instance = cls(match={field: {'query': query}})
+        if operator is not None:
+            instance['match'][field]['operator'] = operator
 
         return instance
-    
+
     @classmethod
     def bool(cls, must=None, should=None, must_not=None, minimum_number_should_match=None, boost=None):
         '''
@@ -115,11 +118,16 @@ class ElasticQuery(dict):
 
         '''
         instance = cls(bool={})
-        if must is not None: instance['bool']['must']=must
-        if should is not None: instance['bool']['should']=should
-        if must_not is not None: instance['bool']['must_not']=must_not
-        if minimum_number_should_match is not None: instance['bool']['minimum_number_should_match']=minimum_number_should_match
-        if boost is not None: instance['bool']['boost']=boost
+        if must is not None:
+            instance['bool']['must'] = must
+        if should is not None:
+            instance['bool']['should'] = should
+        if must_not is not None:
+            instance['bool']['must_not'] = must_not
+        if minimum_number_should_match is not None:
+            instance['bool']['minimum_number_should_match'] = minimum_number_should_match
+        if boost is not None:
+            instance['bool']['boost'] = boost
 
         return instance
 
@@ -138,8 +146,10 @@ class ElasticQuery(dict):
           }
         '''
         instance = cls(ids={})
-        if values is not None: instance['ids']['values']=values
-        if itype is not None: instance['ids']['type']=itype
+        if values is not None:
+            instance['ids']['values'] = values
+        if itype is not None:
+            instance['ids']['type'] = itype
         return instance
 
     @classmethod
@@ -148,10 +158,13 @@ class ElasticQuery(dict):
         http://www.elasticsearch.org/guide/reference/query-dsl/fuzzy-query.html
         A fuzzy based query that uses similarity based on Levenshtein (edit distance) algorithm.
         '''
-        instance = cls(fuzzy={field:{'value':value}})
-        if boost is not None: instance['fuzzy'][field]['boost'] = boost
-        if min_similarity is not None: instance['fuzzy'][field]['min_similarity'] = min_similarity
-        if prefix_length is not None: instance['fuzzy'][field]['prefix_length'] = prefix_length
+        instance = cls(fuzzy={field: {'value': value}})
+        if boost is not None:
+            instance['fuzzy'][field]['boost'] = boost
+        if min_similarity is not None:
+            instance['fuzzy'][field]['min_similarity'] = min_similarity
+        if prefix_length is not None:
+            instance['fuzzy'][field]['prefix_length'] = prefix_length
         return instance
 
     @classmethod
@@ -171,14 +184,21 @@ class ElasticQuery(dict):
               'prefix_length': 0}}
 
         '''
-        instance = cls(fuzzy_like_this={'like_text':like_text})
-        if fields is not None: instance['fuzzy_like_this']['fields'] = fields
-        if ignore_tf is not None: instance['fuzzy_like_this']['ignore_tf'] = ignore_tf
-        if max_query_terms is not None: instance['fuzzy_like_this']['max_query_terms'] = max_query_terms
-        if min_similarity is not None: instance['fuzzy_like_this']['min_similarity'] = min_similarity
-        if prefix_length is not None: instance['fuzzy_like_this']['prefix_length'] = prefix_length
-        if boost is not None: instance['fuzzy_like_this']['boost'] = boost
-        if analyzer is not None: instance['fuzzy_like_this']['analyzer'] = analyzer
+        instance = cls(fuzzy_like_this={'like_text': like_text})
+        if fields is not None:
+            instance['fuzzy_like_this']['fields'] = fields
+        if ignore_tf is not None:
+            instance['fuzzy_like_this']['ignore_tf'] = ignore_tf
+        if max_query_terms is not None:
+            instance['fuzzy_like_this']['max_query_terms'] = max_query_terms
+        if min_similarity is not None:
+            instance['fuzzy_like_this']['min_similarity'] = min_similarity
+        if prefix_length is not None:
+            instance['fuzzy_like_this']['prefix_length'] = prefix_length
+        if boost is not None:
+            instance['fuzzy_like_this']['boost'] = boost
+        if analyzer is not None:
+            instance['fuzzy_like_this']['analyzer'] = analyzer
 
         return instance
 
@@ -192,7 +212,7 @@ class ElasticQuery(dict):
         > query = ElasticQuery().has_Child('blog_tag', child_query)
         '''
 
-        instance = cls(has_child={'type':child_type, 'query':query})
+        instance = cls(has_child={'type': child_type, 'query': query})
         return instance
 
     @classmethod
@@ -203,28 +223,40 @@ class ElasticQuery(dict):
         '''
 
         return cls(match_all={})
-    
+
     @classmethod
-    def mlt(cls, like_text, fields=None,percent_terms_to_match=None, min_term_freq=None, max_query_terms=None, stop_words=None, min_doc_freq=None, max_doc_freq=None, min_word_len=None, max_word_len=None, boost_terms=None, boost=None, analyzer=None):
+    def mlt(cls, like_text, fields=None, percent_terms_to_match=None, min_term_freq=None, max_query_terms=None, stop_words=None, min_doc_freq=None, max_doc_freq=None, min_word_len=None, max_word_len=None, boost_terms=None, boost=None, analyzer=None):
         '''
         http://www.elasticsearch.org/guide/reference/query-dsl/mlt-query.html
         More like this query find documents that are "like" provided text by running it against one or more fields.
         > query = ElasticQuery().mlt('text like this one', fields=['post.content'])
         '''
 
-        instance = cls(more_like_this={'like_text':like_text})
-        if fields is not None: instance['more_like_this']['fields'] = fields
-        if percent_terms_to_match is not None: instance['more_like_this']['percent_terms_to_match'] = percent_terms_to_match
-        if min_term_freq is not None: instance['more_like_this']['min_term_freq'] = min_term_freq
-        if max_query_terms is not None: instance['more_like_this']['max_query_terms'] = max_query_terms
-        if stop_words is not None: instance['more_like_this']['stop_words'] = stop_words
-        if min_doc_freq is not None: instance['more_like_this']['min_doc_freq'] = min_doc_freq
-        if max_doc_freq is not None: instance['more_like_this']['max_doc_freq'] = max_doc_freq
-        if min_word_len is not None: instance['more_like_this']['min_word_len'] = min_word_len
-        if max_word_len is not None: instance['more_like_this']['max_word_len'] = max_word_len
-        if boost_terms is not None: instance['more_like_this']['boost_terms'] = boost_terms
-        if boost is not None: instance['more_like_this']['boost'] = boost
-        if analyzer is not None: instance['more_like_this']['analyzer'] = analyzer
+        instance = cls(more_like_this={'like_text': like_text})
+        if fields is not None:
+            instance['more_like_this']['fields'] = fields
+        if percent_terms_to_match is not None:
+            instance['more_like_this']['percent_terms_to_match'] = percent_terms_to_match
+        if min_term_freq is not None:
+            instance['more_like_this']['min_term_freq'] = min_term_freq
+        if max_query_terms is not None:
+            instance['more_like_this']['max_query_terms'] = max_query_terms
+        if stop_words is not None:
+            instance['more_like_this']['stop_words'] = stop_words
+        if min_doc_freq is not None:
+            instance['more_like_this']['min_doc_freq'] = min_doc_freq
+        if max_doc_freq is not None:
+            instance['more_like_this']['max_doc_freq'] = max_doc_freq
+        if min_word_len is not None:
+            instance['more_like_this']['min_word_len'] = min_word_len
+        if max_word_len is not None:
+            instance['more_like_this']['max_word_len'] = max_word_len
+        if boost_terms is not None:
+            instance['more_like_this']['boost_terms'] = boost_terms
+        if boost is not None:
+            instance['more_like_this']['boost'] = boost
+        if analyzer is not None:
+            instance['more_like_this']['analyzer'] = analyzer
         return instance
 
     @classmethod
@@ -236,7 +268,7 @@ class ElasticQuery(dict):
         > query = ElasticQuery().prefix('user', 'lu')
         '''
         return cls(prefix=dict(**kwargs))
-    
+
     @classmethod
     def query_string(cls,
                      query,
@@ -259,20 +291,33 @@ class ElasticQuery(dict):
 
         > query = ElasticQuery().query_string('this AND that OR thus', default_field='content')
         '''
-        instance = cls(query_string={'query':query})
-        if default_field is not None: instance['query_string']['default_field'] = default_field
-        if default_operator is not None: instance['query_string']['default_operator'] = default_operator
-        if analyzer is not None: instance['query_string']['analyzer'] = analyzer
-        if allow_leading_wildcard is not None: instance['query_string']['allow_leading_wildcard'] = allow_leading_wildcard
-        if lowercase_expanded_terms is not None: instance['query_string']['lowercase_expanded_terms'] = lowercase_expanded_terms
-        if enable_position_increments is not None: instance['query_string']['enable_position_increments'] = enable_position_increments
-        if fuzzy_prefix_length is not None: instance['query_string']['fuzzy_prefix_length'] = fuzzy_prefix_length
-        if fuzzy_min_sim is not None: instance['query_string']['fuzzy_min_sim'] = fuzzy_min_sim
-        if phrase_slop is not None: instance['query_string']['phrase_slop'] = phrase_slop
-        if boost is not None: instance['query_string']['boost'] = boost
-        if analyze_wildcard is not None: instance['query_string']['analyze_wildcard'] = analyze_wildcard
-        if auto_generate_phrase_queries is not None: instance['query_string']['auto_generate_phrase_queries'] = auto_generate_phrase_queries
-        if minimum_should_match is not None: instance['query_string']['minimum_should_match'] = minimum_should_match
+        instance = cls(query_string={'query': query})
+        if default_field is not None:
+            instance['query_string']['default_field'] = default_field
+        if default_operator is not None:
+            instance['query_string']['default_operator'] = default_operator
+        if analyzer is not None:
+            instance['query_string']['analyzer'] = analyzer
+        if allow_leading_wildcard is not None:
+            instance['query_string']['allow_leading_wildcard'] = allow_leading_wildcard
+        if lowercase_expanded_terms is not None:
+            instance['query_string']['lowercase_expanded_terms'] = lowercase_expanded_terms
+        if enable_position_increments is not None:
+            instance['query_string']['enable_position_increments'] = enable_position_increments
+        if fuzzy_prefix_length is not None:
+            instance['query_string']['fuzzy_prefix_length'] = fuzzy_prefix_length
+        if fuzzy_min_sim is not None:
+            instance['query_string']['fuzzy_min_sim'] = fuzzy_min_sim
+        if phrase_slop is not None:
+            instance['query_string']['phrase_slop'] = phrase_slop
+        if boost is not None:
+            instance['query_string']['boost'] = boost
+        if analyze_wildcard is not None:
+            instance['query_string']['analyze_wildcard'] = analyze_wildcard
+        if auto_generate_phrase_queries is not None:
+            instance['query_string']['auto_generate_phrase_queries'] = auto_generate_phrase_queries
+        if minimum_should_match is not None:
+            instance['query_string']['minimum_should_match'] = minimum_should_match
         return instance
 
     @classmethod
@@ -289,12 +334,17 @@ class ElasticQuery(dict):
 
         > query = ElasticQuery().range('age', from_value=10, to_value=20, boost=2.0)
         '''
-        instance = cls(range={field:{}})
-        if from_value is not None: instance['range'][field]['from'] = from_value
-        if to_value is not None: instance['range'][field]['to'] = to_value
-        if include_lower is not None: instance['range'][field]['include_lower'] = include_lower
-        if include_upper is not None: instance['range'][field]['include_upper'] = include_upper
-        if boost is not None: instance['range'][field]['boost'] = boost
+        instance = cls(range={field: {}})
+        if from_value is not None:
+            instance['range'][field]['from'] = from_value
+        if to_value is not None:
+            instance['range'][field]['to'] = to_value
+        if include_lower is not None:
+            instance['range'][field]['include_lower'] = include_lower
+        if include_upper is not None:
+            instance['range'][field]['include_upper'] = include_upper
+        if boost is not None:
+            instance['range'][field]['boost'] = boost
         return instance
 
     @classmethod
@@ -305,6 +355,4 @@ class ElasticQuery(dict):
 
         > query = ElasticQuery.wildcard('user', 'ki*y')
         '''
-        return cls(wildcard={field:value})
-
-
+        return cls(wildcard={field: value})

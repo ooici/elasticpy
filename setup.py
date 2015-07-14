@@ -14,11 +14,11 @@ setup(
         'Topic :: System :: Software Distribution',
         'Topic :: System :: Systems Administration',
         'Topic :: Utilities'
-        ],
+    ],
     license='Apache 2.0',
     keywords='elasticsearch search wrapper',
     packages=['elasticpy'],
-    install_requires = [
+    install_requires=[
         'Requests>=0.12.1',
         'simplejson==2.1.6'
     ],

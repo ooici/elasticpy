@@ -7,8 +7,8 @@
 '''
 
 
-
 class ElasticFacet(dict):
+
     '''
     Facets for search
     http://www.elasticsearch.org/guide/reference/api/search/facets/
@@ -31,7 +31,7 @@ class ElasticFacet(dict):
         Regex Patterns: The terms API allows to define regex expression that will control which terms will be included in the faceted list.
         '''
 
-        self[facet_name] = dict(terms=dict(field=field,size=size))
+        self[facet_name] = dict(terms=dict(field=field, size=size))
         if order:
             self[facet_name][terms]['order'] = order
         if all_terms:
@@ -45,7 +45,7 @@ class ElasticFacet(dict):
 
         return self
 
-    def range(self,facet_name, field, ranges=[]):
+    def range(self, facet_name, field, ranges=[]):
         '''
         Range facet allow to specify a set of ranges and get both the number of docs (count) that fall within each range, and aggregated data either based on the field, or using another field.
         http://www.elasticsearch.org/guide/reference/api/search/facets/range-facet.html
@@ -66,7 +66,7 @@ class ElasticFacet(dict):
         }
         '''
 
-        self[facet_name] = {'range'  : { 'field' : field,'ranges' : [] }}
+        self[facet_name] = {'range': {'field': field, 'ranges': []}}
         for s in ranges:
             if not isinstance(s, slice):
                 continue
@@ -78,4 +78,3 @@ class ElasticFacet(dict):
             self[facet_name]['range']['ranges'].append(entry)
 
         return self
-
